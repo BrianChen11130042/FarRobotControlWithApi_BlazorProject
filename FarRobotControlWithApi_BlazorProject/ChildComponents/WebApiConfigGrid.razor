@@ -1,0 +1,34 @@
+﻿@using CommonLibraryB.Manager.WebApiClient
+@using DevExpress.Blazor
+
+<DxGrid Data="Data"
+        PageSize="PageSize"
+        ShowGroupPanel="false"
+        EditMode="GridEditMode.EditCell"
+        EditModelSaving="EditModelSaving"
+        KeyFieldName="@nameof(WebApiClientConfig.device)">
+
+    <ToolbarTemplate>
+        @if (!string.IsNullOrWhiteSpace(Title))
+        {
+            <DxToolbar Title="@Title" />
+        }
+    </ToolbarTemplate>
+
+    <Columns>
+        <DxGridDataColumn FieldName=@nameof(WebApiClientConfig.device) Caption="Client" ReadOnly="true" MinWidth="150"/>
+        <DxGridDataColumn FieldName=@nameof(WebApiClientConfig.Http) Caption="Protocol" ReadOnly="false" MinWidth="150" />
+        <DxGridDataColumn FieldName=@nameof(WebApiClientConfig.Ip) Caption="Ip" ReadOnly="false" MinWidth="150" />
+        <DxGridDataColumn FieldName=@nameof(WebApiClientConfig.Port) Caption="Port" ReadOnly="false" MinWidth="150" />
+        <DxGridDataColumn FieldName=@nameof(WebApiClientConfig.Enable) Caption="Enable" ReadOnly="false" MinWidth="150" />
+    </Columns>
+</DxGrid>
+<br />
+
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public IEnumerable<WebApiClientConfig>? Data { get; set; }
+    [Parameter] public int PageSize { get; set; } = 12;
+    [Parameter] public EventCallback<GridEditModelSavingEventArgs> EditModelSaving { get; set; }
+}

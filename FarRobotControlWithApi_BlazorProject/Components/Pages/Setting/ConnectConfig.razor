@@ -1,0 +1,57 @@
+﻿@page "/ConnectConfig"
+@using CommonLibraryB.Library.AmrControl.Config
+@using CommonLibraryB.Manager.WebApiClient
+@using FarRobotControlWithApi_BlazorProject.ChildComponents
+@using FarRobotControlWithApi_BlazorProject.Services.Interface
+@rendermode InteractiveServer
+@inject IMachineService IService
+
+<WebApiConfigGrid Title="Web Api Client Config"
+	              Data="listWebApiClient"
+                  PageSize="12"
+				  EditModelSaving="editWebApiClient">
+
+</WebApiConfigGrid>
+
+<AmrControlConfigGrid Title="AMR Control Config"
+					  Data="listAmrControl"
+					  PageSize="12"
+					  EditModelSaving="editAmrControl">
+
+</AmrControlConfigGrid>
+
+@code {
+
+	List<WebApiClientConfig> listWebApiClient { get; set; } = new List<WebApiClientConfig>();
+	List<AmrControlConfig> listAmrControl { get; set; } = new List<AmrControlConfig>();
+
+	protected override async Task OnInitializedAsync()
+	{
+		await ReadPageData();
+	}
+
+	async Task ReadPageData()
+	{
+		listWebApiClient = await IService.GetWebApiClientConfig();
+		listAmrControl = await IService.GetAmrControlConfig();
+	}
+
+	public async Task editWebApiClient(GridEditModelSavingEventArgs e)
+	{
+		WebApiClientConfig editData = (WebApiClientConfig)e.EditModel;
+
+		await IService.SetWebApiClientConfig(editData);
+
+		await ReadPageData();
+	}
+
+	public async Task editAmrControl(GridEditModelSavingEventArgs e)
+	{
+		AmrControlConfig editData = (AmrControlConfig)e.EditModel;
+
+		await IService.SetAmrControlConfig(editData);
+
+		await ReadPageData();
+	}
+
+}

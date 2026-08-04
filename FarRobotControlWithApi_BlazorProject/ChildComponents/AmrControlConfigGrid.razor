@@ -1,0 +1,31 @@
+﻿@using CommonLibraryB.Library.AmrControl.Config
+@using DevExpress.Blazor
+
+<DxGrid Data="Data"
+        PageSize="PageSize"
+        ShowGroupPanel="false"
+        EditMode="GridEditMode.EditCell"
+        EditModelSaving="EditModelSaving"
+        KeyFieldName="@nameof(AmrControlConfig.device)">
+
+    <ToolbarTemplate>
+        @if (!string.IsNullOrWhiteSpace(Title))
+        {
+            <DxToolbar Title="@Title" />
+        }
+    </ToolbarTemplate>
+
+    <Columns>
+        <DxGridDataColumn FieldName=@nameof(AmrControlConfig.device) Caption="Device" ReadOnly="true" MinWidth="150" />
+        <DxGridDataColumn FieldName=@nameof(AmrControlConfig.client) Caption="Web API Client" ReadOnly="false" MinWidth="150" />
+        <DxGridDataColumn FieldName=@nameof(AmrControlConfig.supplier) Caption="Supplier" ReadOnly="false" MinWidth="150" />
+    </Columns>
+</DxGrid>
+<br />
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public IEnumerable<AmrControlConfig>? Data { get; set; }
+    [Parameter] public int PageSize { get; set; } = 12;
+    [Parameter] public EventCallback<GridEditModelSavingEventArgs> EditModelSaving { get; set; }
+}
