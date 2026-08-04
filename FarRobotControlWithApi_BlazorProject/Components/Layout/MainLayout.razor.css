@@ -163,3 +163,9 @@
         display: block;
     }
 }
+
+.page-body {
+    height: 100%;
+    overflow: auto;
+    padding-top: 1rem; /* 跟上方選單隔開 */
+}

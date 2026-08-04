@@ -1,0 +1,27 @@
+﻿@using DevExpress.Blazor
+@inject IToastNotificationService IToastService
+@inject IToastMessage ItoastMessage
+
+<DxToastProvider HorizontalAlignment="HorizontalAlignment.Right"
+                 VerticalAlignment="VerticalEdge.Bottom"
+                 DisplayTime="@TimeSpan.FromSeconds(5)"
+                 ThemeMode="ToastThemeMode.Dark" />
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        ItoastMessage.dgNotifyToast += Show;
+    }
+
+    async Task Show(string title, string msg, ToastRenderStyle style)
+    {
+        IToastService.ShowToast(new ToastOptions
+        {
+            Title = title,
+            Text = msg,
+            RenderStyle = style
+        });
+    }
+
+}

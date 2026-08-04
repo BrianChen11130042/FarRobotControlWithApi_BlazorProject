@@ -6,7 +6,7 @@
 @using FarRobotControlWithApi_BlazorProject.UITools.ToastMessage
 @rendermode InteractiveServer
 @inject IMachineService IService
-@inject ToastMessage toastMsg
+@inject IToastMessage IToastMsg
 
 <WebApiConfigGrid Title="Web Api Client Config"
 	              Data="listWebApiClient"
@@ -21,11 +21,6 @@
 					  EditModelSaving="editAmrControl">
 
 </AmrControlConfigGrid>
-
-<DxToastProvider HorizontalAlignment="HorizontalAlignment.Right"
-				 VerticalAlignment="VerticalEdge.Bottom"
-				 DisplayTime="@TimeSpan.FromSeconds(5)" 
-				 ThemeMode="ToastThemeMode.Dark" />
 
 <div class="text-center mt-5">
 	<DxButton Text="初始化連線"
@@ -56,7 +51,7 @@
 
 		await IService.SetWebApiClientConfig(editData);
 
-		toastMsg.NotifySuccess("Modify Success");
+		IToastMsg.NotifySuccess("Modify Success");
 
 		await ReadPageData();
 	}
@@ -67,14 +62,14 @@
 
 		await IService.SetAmrControlConfig(editData);
 
-		toastMsg.NotifySuccess("Modify Success");
+		IToastMsg.NotifySuccess("Modify Success");
 
 		await ReadPageData();
 	}
 
 	async Task initial()
 	{
-		toastMsg.NotifyInfo("Init Start");
+		IToastMsg.NotifyInfo("Init Start");
 
 		await IService.Initial();
 	}

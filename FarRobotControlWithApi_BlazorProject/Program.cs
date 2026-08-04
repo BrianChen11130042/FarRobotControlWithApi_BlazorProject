@@ -37,7 +37,7 @@ builder.Services.AddMvc();
 
 string filePath = System.AppDomain.CurrentDomain.BaseDirectory;
 
-builder.Services.AddScoped<ToastMessage>();
+builder.Services.AddScoped<IToastMessage, ToastMessage>();
 
 builder.Services.AddSingleton<LogWritter>(provider => new LogWritter(filePath));
 
