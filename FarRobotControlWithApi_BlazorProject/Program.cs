@@ -9,6 +9,7 @@ using FarRobotControlWithApi_BlazorProject.EquipName.AmrControl;
 using FarRobotControlWithApi_BlazorProject.Scope;
 using FarRobotControlWithApi_BlazorProject.Services;
 using FarRobotControlWithApi_BlazorProject.Services.Interface;
+using FarRobotControlWithApi_BlazorProject.UITools.ToastMessage;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
 //var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,8 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddMvc();
 
 string filePath = System.AppDomain.CurrentDomain.BaseDirectory;
+
+builder.Services.AddScoped<ToastMessage>();
 
 builder.Services.AddSingleton<LogWritter>(provider => new LogWritter(filePath));
 
