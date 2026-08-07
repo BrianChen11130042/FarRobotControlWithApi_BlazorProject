@@ -1,0 +1,51 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace FarRobotControlWithApi_BlazorProject.EFModel
+{
+    public abstract class FlowBase
+    {
+        [Key]
+        public Guid Id { get; set; }
+
+        public Guid MissionId { get; set; }
+
+        [MaxLength(500)]
+        public string? AmrSerialNumber { get; set; }
+
+        [MaxLength(500)]
+        public string? FlowId { get; set; }
+
+        public int Priority { get; set; }
+
+        public int State { get; set; }
+
+        [MaxLength(500)]
+        public string? StateString { get; set; }
+
+        public double CompletePercent { get; set; }
+
+        public DateTime EstablishTime { get; set; }
+
+        [NotMapped]
+        public bool IsStart => StartTime is not null;
+
+        public DateTime? StartTime { get; set; }
+
+        [NotMapped]
+        public bool IsError => ErrorCode is not 0 || !String.IsNullOrEmpty(ErrorMessage);
+
+        public int ErrorCode { get; set; }
+
+        public string? ErrorMessage { get; set; }
+
+        [NotMapped]
+        public bool IsFinish => FinishTime is not null;
+
+        public DateTime? FinishTime { get; set; }
+
+        public bool IsCancel { get; set; }
+
+        public virtual AmrMissionTable? Mission{ get; set; }
+    }
+}

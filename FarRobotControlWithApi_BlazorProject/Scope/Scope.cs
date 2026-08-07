@@ -13,14 +13,14 @@
         void _createAll()
         {
             _createTool();
-            _createCommonService();
+            _createProjectLibrary();
             _createManager();
             _createAmrControl();
         }
 
         public void initAll()
         {
-            _initCommonService();
+            _initProjectLibrary();
             _initManager();
             _initAmrControl();
         }

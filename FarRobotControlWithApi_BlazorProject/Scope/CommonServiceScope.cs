@@ -1,4 +1,4 @@
-﻿using FarRobotControlWithApi_BlazorProject.CommonLibrary.Observer;
+﻿using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer;
 
 namespace FarRobotControlWithApi_BlazorProject.Scope
 {
@@ -6,12 +6,12 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
     {
         public ObserverLibrary observerLibrary;
 
-        void _createCommonService()
+        void _createProjectLibrary()
         {
             observerLibrary = provider.GetRequiredService<ObserverLibrary>();
         }
 
-        void _initCommonService()
+        void _initProjectLibrary()
         {
             observerLibrary.AddNLogWritterObserver(logger);
         }

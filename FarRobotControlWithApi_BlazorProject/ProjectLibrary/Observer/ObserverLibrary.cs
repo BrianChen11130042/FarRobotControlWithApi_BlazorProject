@@ -1,6 +1,6 @@
 ﻿using CommonLibraryB.Tools.LogWritter;
 
-namespace FarRobotControlWithApi_BlazorProject.CommonLibrary.Observer
+namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer
 {
     public partial class ObserverLibrary : INLogWritterObservable
     {
