@@ -45,8 +45,8 @@ builder.Services.AddMvc();
 builder.Services.AddDbContext<SwarmCoreDbContext>(options => 
 options.UseSqlServer(connectString));
 
-builder.Services.AddSingleton<ILogTableOperate, LogTableLibrary>();
-builder.Services.AddSingleton<IMissionTableOperate, MissionTableLibrary>();
+builder.Services.AddSingleton<LogTableLibrary>();
+builder.Services.AddSingleton<MissionTableLibrary>();
 
 string filePath = System.AppDomain.CurrentDomain.BaseDirectory;
 
