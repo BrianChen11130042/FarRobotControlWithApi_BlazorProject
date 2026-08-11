@@ -33,7 +33,12 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
 
         public DateTime? FinishTime { get; set; }
 
-        public bool IsCancel { get; set; }
+        public bool CancelRequest { get; set; }
+
+        [NotMapped]
+        public bool IsCancel => CancelTime is not null;
+
+        public DateTime? CancelTime { get; set; }
 
         public virtual ICollection<FlowBase> Flows { get; set; } = new List<FlowBase>();
 
