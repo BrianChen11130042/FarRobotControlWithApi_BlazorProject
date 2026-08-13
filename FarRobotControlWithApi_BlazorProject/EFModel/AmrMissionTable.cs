@@ -14,6 +14,8 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
 
         public int Priority { get; set; }
 
+        public int FlowCount { get; set; }
+
         public DateTime EstablishTime { get; set; }
 
         [NotMapped]

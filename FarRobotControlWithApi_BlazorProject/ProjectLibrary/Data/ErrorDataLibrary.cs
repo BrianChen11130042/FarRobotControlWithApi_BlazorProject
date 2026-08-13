@@ -1,16 +1,23 @@
 ﻿using CommonLibraryB.Tools.LogWritter;
-using FarRobotControlWithApi_BlazorProject.DTOModel;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface;
+using FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable.Interface;
+using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer.Interface;
 
 namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
 {
-    public partial class SwarmCoreRegularDataLibary
+    public partial class ErrorDataLibrary
     {
+        readonly ILogTableOperate ILogTableOp;
 
+        readonly ISystemControlObservable ISysControlObser;
         readonly INLogObservable INLogObser;
 
-        public SwarmCoreRegularDataLibary(INLogObservable INLogObser)
+        public ErrorDataLibrary(ILogTableOperate ILogTableOp,
+                                ISystemControlObservable ISysControlObser,
+                                INLogObservable INLogObser)
         {
+            this.ILogTableOp = ILogTableOp;
+            this.ISysControlObser = ISysControlObser;
             this.INLogObser = INLogObser;
         }
 
@@ -25,20 +32,11 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
         }
     }
 
-    public partial class SwarmCoreRegularDataLibary : ISwarmCoreRegularDataLibrary
+    public partial class ErrorDataLibrary : IErrorDataLibarary
     {
-        AccessTokenDto _accessToken { get; set; } = new AccessTokenDto();
-
-        public AccessTokenDto TokenInform
+        public async Task NotifySysDisconect()
         {
-            get
-            {
-                return _accessToken;
-            }
-            set
-            {
-                _accessToken = value;
-            }
+            await ISysControlObser.NotifyDisconnect();
         }
 
         public async Task WriteNLogError(string log)

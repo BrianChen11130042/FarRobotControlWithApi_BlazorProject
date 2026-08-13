@@ -2,12 +2,19 @@
 {
     public interface ISwarmCoreSetMissionTaskPack
     {
-        //bool IsNewMisison();
+        Task<bool> GetNextMission();
 
-        //Task<bool> SetNewMission();
+        bool IsNewMission();
 
-        //bool IsMissionCancel();
+        bool IsCancelMissionBeforeDispatch();
 
-        //Task<bool> SetMissionCancel();
+        bool IsCancelMissionAfterDispatch();
+
+
+        Task<bool> DispatchNewMission();
+
+        Task<bool> UpsertMissionTable();
+
+        Task NotifyMissionUpdated();
     }
 }

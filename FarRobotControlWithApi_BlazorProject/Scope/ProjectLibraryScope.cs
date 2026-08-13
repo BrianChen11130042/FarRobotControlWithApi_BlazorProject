@@ -13,6 +13,7 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
         public LogTableLibrary logTableLibrary;
 
         public SwarmCoreRegularDataLibary swarmCoreRegularDataLibary;
+        public SwarmCoreSetMissionDataLibrary swarmCoreSetMissionDataLibrary;
 
         void _createProjectLibrary()
         {
@@ -22,11 +23,15 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
             logTableLibrary = provider.GetRequiredService<LogTableLibrary>();
 
             swarmCoreRegularDataLibary = new SwarmCoreRegularDataLibary(observerLibrary);
+            swarmCoreSetMissionDataLibrary = new SwarmCoreSetMissionDataLibrary(logTableLibrary, 
+                                                                                missionTableLibrary,
+                                                                                observerLibrary, 
+                                                                                observerLibrary);
         }
 
         void _initProjectLibrary()
         {
-            observerLibrary.AddNLogWritterObserver(logger);
+            observerLibrary.AddNLogObserver(logger);
         }
     }
 }
