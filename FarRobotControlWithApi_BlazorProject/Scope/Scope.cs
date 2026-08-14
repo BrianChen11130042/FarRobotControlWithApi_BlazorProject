@@ -20,9 +20,17 @@
 
         public void initAll()
         {
+            _stopThread();
+
             _initProjectLibrary();
             _initManager();
             _initAmrControl();
+
+            _initSysControlTask();
+            _initSetMissionTask();
+            _initRegularTask();
+            _initThreadTask();
+            _initThread();
         }
     }
 }

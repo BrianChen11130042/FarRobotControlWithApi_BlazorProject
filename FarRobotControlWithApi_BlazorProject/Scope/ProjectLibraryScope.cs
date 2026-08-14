@@ -14,6 +14,8 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
 
         public SwarmCoreRegularDataLibary swarmCoreRegularDataLibary;
         public SwarmCoreSetMissionDataLibrary swarmCoreSetMissionDataLibrary;
+        public InitialDataLibrary initialDataLibrary;
+        public ErrorDataLibrary errorDataLibrary;
 
         void _createProjectLibrary()
         {
@@ -27,6 +29,15 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
                                                                                 missionTableLibrary,
                                                                                 observerLibrary, 
                                                                                 observerLibrary);
+            initialDataLibrary = new InitialDataLibrary(logTableLibrary,
+                                                        missionTableLibrary,
+                                                        observerLibrary,
+                                                        observerLibrary,
+                                                        observerLibrary);
+
+            errorDataLibrary = new ErrorDataLibrary(logTableLibrary,
+                                                    observerLibrary,
+                                                    observerLibrary);
         }
 
         void _initProjectLibrary()
