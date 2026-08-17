@@ -1,0 +1,52 @@
+﻿@using FarRobotControlWithApi_BlazorProject.EFModel
+
+<DxGrid Data="@Flows" PageSize="20" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
+    <Columns>
+        <DxGridDataColumn Caption="FlowType">
+            <CellDisplayTemplate Context="cell">
+                @_getFlowType(cell.DataItem)
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+
+        <DxGridDataColumn Caption="Detail" Width="320px">
+            <CellDisplayTemplate Context="cell">
+                <FlowDetailHost Flow="@(cell.DataItem as FlowBase)" />
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+
+        <DxGridDataColumn FieldName="@nameof(FlowBase.EstablishTime)" DisplayFormat="g" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.StartTime)" DisplayFormat="g" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.CompletePercent)" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.FinishTime)" DisplayFormat="g" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.ErrorCode)" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.ErrorMessage)" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.CancelRequest)" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.CancelTime)" DisplayFormat="g" />
+
+    </Columns>
+</DxGrid>
+
+
+@code {
+
+    [Parameter]
+    public AmrMissionTable? Mission { get; set; }
+
+    IEnumerable<FlowBase>? Flows => Mission?.Flows.OrderBy(x => x.EstablishTime).ThenBy(x => x.Id) ?? Enumerable.Empty<FlowBase>();
+
+    string _getFlowType(object item)
+    {
+        switch (item)
+        {
+            case MoveFlowTable moveFlow:
+                return "Move";
+
+
+            case ChargeFlowTable chargeFlow:
+                return "Charge";
+
+            default:
+                return "?";
+        }
+    }
+}

@@ -1,0 +1,11 @@
+﻿@using FarRobotControlWithApi_BlazorProject.EFModel
+
+<div>
+    <div><b>Cell</b> : @Flow.CellName</div>
+    <div><b>Target</b> : @Flow.Percentage%</div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ChargeFlowTable Flow { get; set; } = null!;
+}

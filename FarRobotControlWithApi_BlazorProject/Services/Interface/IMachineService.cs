@@ -1,5 +1,6 @@
 ﻿using CommonLibraryB.Library.AmrControl.Config;
 using CommonLibraryB.Manager.WebApiClient;
+using FarRobotControlWithApi_BlazorProject.EFModel;
 
 namespace FarRobotControlWithApi_BlazorProject.Services.Interface
 {
@@ -15,6 +16,13 @@ namespace FarRobotControlWithApi_BlazorProject.Services.Interface
         Task SetAmrControlConfig(AmrControlConfig config);
 
         Task Initial();
+
+        //任務
+        Task<List<AmrMissionTable>> GetAmrMissionInQueue();
+
+        Task<bool> SetMission(AmrMissionTable mission);
+
+        event dgAmrMissionUpdated dgAmrMissionUpdate;
 
     }
 }

@@ -1,6 +1,9 @@
 ﻿using CommonLibraryB.Library.AmrControl.Config;
 using CommonLibraryB.Manager.WebApiClient;
+using CommonLibraryB.Tools.LogWritter;
+using FarRobotControlWithApi_BlazorProject.EFModel;
 using FarRobotControlWithApi_BlazorProject.EquipName.AmrControl;
+using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer.Interface;
 using FarRobotControlWithApi_BlazorProject.Scope;
 using FarRobotControlWithApi_BlazorProject.Services.Interface;
 
@@ -14,7 +17,7 @@ namespace FarRobotControlWithApi_BlazorProject.Services
         {
             this.scope = scope;
 
-
+            scope.observerLibrary.AddMissionObserver(this);
         }
     }
 
@@ -69,6 +72,38 @@ namespace FarRobotControlWithApi_BlazorProject.Services
         public async Task Initial()
         {
             scope.initAll();
+        }
+    }
+
+    public delegate Task dgAmrMissionUpdated(List<AmrMissionTable> missions);
+
+    public partial class MachineService : IMissionObserver
+    {
+        public event dgAmrMissionUpdated dgAmrMissionUpdate;
+
+        public async Task HandleMissionUpdated(List<AmrMissionTable> list)
+        {
+            dgAmrMissionUpdate?.Invoke(list);
+        }
+
+        public async Task<List<AmrMissionTable>> GetAmrMissionInQueue()
+        {
+            return scope.missionTableLibrary.listAmrMissionInQueue;
+        }
+
+        public async Task<bool> SetMission(AmrMissionTable mission)
+        {
+            var result = await scope.missionTableLibrary.UpsertMissionTable(mission);
+
+            if(result.status)
+            {
+                return result.status;
+            }
+            else
+            {
+                await scope.observerLibrary.NotifyNLog(EStatus.Error, result.msg);
+                return result.status;
+            }
         }
     }
 }

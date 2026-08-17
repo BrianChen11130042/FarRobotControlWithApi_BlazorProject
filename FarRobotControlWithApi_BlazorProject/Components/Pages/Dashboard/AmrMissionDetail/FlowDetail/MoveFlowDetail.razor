@@ -1,0 +1,10 @@
+﻿@using FarRobotControlWithApi_BlazorProject.EFModel
+
+<div>
+    <div><b>Cell</b> : @Flow.CellName</div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public MoveFlowTable Flow { get; set; } = null!;
+}

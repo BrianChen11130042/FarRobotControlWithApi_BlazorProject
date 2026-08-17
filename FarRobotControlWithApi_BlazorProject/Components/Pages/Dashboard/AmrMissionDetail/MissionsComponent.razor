@@ -1,0 +1,58 @@
+﻿@using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMissionDetail.FlowDetail
+@using FarRobotControlWithApi_BlazorProject.EFModel
+@using FarRobotControlWithApi_BlazorProject.Services.Interface
+@rendermode RenderMode.InteractiveServer
+@inject IMachineService machineService
+
+<DxGrid Data="@listMission" @bind-SelectedDataItem="@targetMissionObj" AllowSelectRowByClick="true" SelectionMode="GridSelectionMode.Single" HighlightRowOnHover="true" AutoCollapseDetailRow="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
+    <ToolbarTemplate>
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <DxToolbarItem IconCssClass="oi oi-plus" Click="NewMissionClick" />
+            <DxToolbarItem IconCssClass="oi oi-media-stop" Enabled="@missionSelected" Click="CancelMissionClick" RenderStyle="ButtonRenderStyle.Danger"/>
+        </DxToolbar>
+    </ToolbarTemplate>
+
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(AmrMissionTable.AmrSerialNumber)" Width="280px" />
+        <DxGridDataColumn FieldName="@nameof(AmrMissionTable.Priority)" />
+        <DxGridDataColumn FieldName="@nameof(AmrMissionTable.FlowCount)" />
+        <DxGridDataColumn FieldName="@nameof(AmrMissionTable.EstablishTime)" DisplayFormat="g" />
+        <DxGridDataColumn FieldName="@nameof(AmrMissionTable.StartTime)" DisplayFormat="g" />
+        <DxGridDataColumn FieldName="@nameof(AmrMissionTable.ErrorCode)" />
+        <DxGridDataColumn FieldName="@nameof(AmrMissionTable.ErrorMessage)" />
+        <DxGridDataColumn FieldName="@nameof(AmrMissionTable.FinishTime)" DisplayFormat="g" />
+        <DxGridDataColumn FieldName="@nameof(AmrMissionTable.CancelRequest)" />
+        <DxGridDataColumn FieldName="@nameof(AmrMissionTable.CancelTime)" DisplayFormat="g" />
+    </Columns>
+
+    <DetailRowTemplate Context="Context">
+        <MissionFlowsDetail Mission="@(Context.DataItem as AmrMissionTable)" />
+    </DetailRowTemplate>
+
+</DxGrid>
+
+@code {
+    List<AmrMissionTable> listMission { get; set; } = new List<AmrMissionTable>();
+    Object? targetMissionObj;
+    bool missionSelected => targetMissionObj != null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await _loadAmrMissionList();
+    }
+
+    async Task _loadAmrMissionList()
+    {
+        listMission = await machineService.GetAmrMissionInQueue();
+    }
+
+    async Task NewMissionClick()
+    {
+
+    }
+
+    async Task CancelMissionClick()
+    {
+        AmrMissionTable missionTable = (AmrMissionTable)targetMissionObj;
+    }
+}
