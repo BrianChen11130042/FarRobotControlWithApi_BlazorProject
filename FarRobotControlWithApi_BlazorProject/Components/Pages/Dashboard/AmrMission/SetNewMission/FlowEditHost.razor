@@ -1,0 +1,18 @@
+﻿@using FarRobotControlWithApi_BlazorProject.EFModel
+@switch (Flow)
+{
+    case MoveFlowTable move:
+        <MoveFlowEdit Flow="move" />
+        break;
+    case ChargeFlowTable charge:
+        <ChargeFlowEdit Flow="charge" />
+        break;
+
+    default:
+        break;
+}
+
+@code {
+    [Parameter]
+    public FlowBase? Flow { get; set; }
+}

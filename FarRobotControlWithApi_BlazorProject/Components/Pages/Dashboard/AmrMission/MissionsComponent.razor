@@ -1,4 +1,5 @@
 ﻿@using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.MissionFlowDetail
+@using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.SetNewMission
 @using FarRobotControlWithApi_BlazorProject.EFModel
 @using FarRobotControlWithApi_BlazorProject.Services.Interface
 @rendermode RenderMode.InteractiveServer
@@ -31,10 +32,14 @@
 
 </DxGrid>
 
+<NewMissionPopup @ref="newMissionPopup" OnSaved="OnNewMissionSaved" />
+
 @code {
     List<AmrMissionTable> listMission { get; set; } = new List<AmrMissionTable>();
-    Object? targetMissionObj;
+    Object? targetMissionObj { get;set; }
     bool missionSelected => targetMissionObj != null;
+
+    NewMissionPopup? newMissionPopup { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,7 +53,22 @@
 
     async Task NewMissionClick()
     {
+        if (newMissionPopup != null)
+        {
+            await newMissionPopup.ShowAsync();
+        }
+    }
 
+    async Task OnNewMissionSaved(AmrMissionTable mission)
+    {
+        if (await machineService.SetMission(mission))
+        {
+            await _loadAmrMissionList();
+        }
+        else
+        {
+            
+        }
     }
 
     async Task CancelMissionClick()

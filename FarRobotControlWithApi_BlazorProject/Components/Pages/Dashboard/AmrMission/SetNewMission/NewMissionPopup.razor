@@ -1,0 +1,131 @@
+﻿@using FarRobotControlWithApi_BlazorProject.EFModel
+
+<DxPopup @ref="popup" HeaderText="New Mission" ShowCloseButton="true" CloseOnOutsideClick="false" Width="50rem">
+    <BodyContentTemplate>
+        <DxFormLayout>
+            <DxFormLayoutItem Caption="AmrSerialNumber" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="8">
+                <DxTextBox @bind-Text="missionTable.AmrSerialNumber" />
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem Caption="Priority" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="8">
+                <DxSpinEdit @bind-Value="missionTable.Priority" MinValue="1" MaxValue="5"/>
+            </DxFormLayoutItem>
+        </DxFormLayout>
+
+        <div class="mt-3 mb-2 d-flex justify-content-between align-items-center">
+            <strong>Flows</strong>
+            <div>
+                <DxButton Text="Add Move" Click="@(() => BeginAddFlow(EFlowType.Move))" RenderStyle="ButtonRenderStyle.Secondary" />
+                <DxButton Text="Add Charge" Click="@(() => BeginAddFlow(EFlowType.Charge))" RenderStyle="ButtonRenderStyle.Secondary" />
+            </div>
+        </div>
+
+        @if (editFlow is not null)
+        {
+            <div class="border p-2 mb-2">
+                <div class="mb-2">Edit Flow</div>
+                <FlowEditHost Flow="editFlow" />
+                <div class="mt-2">
+                    <DxButton Text="OK" Click="ConfirmEditFlow" RenderStyle="ButtonRenderStyle.Primary" />
+                    <DxButton Text="Cancel" Click="CancelEditFlow" />
+                </div>
+            </div>
+        }
+
+
+        <div class="mt-3 text-end">
+            <DxButton Text="Save" Click="SaveAsync" RenderStyle="ButtonRenderStyle.Primary" />
+            <DxButton Text="Close" Click="CloseAsync" />
+        </div>
+
+    </BodyContentTemplate>
+</DxPopup>
+
+@code {
+    public enum EFlowType
+    {
+        Move,
+        Charge
+    }
+
+    [Parameter]
+    public EventCallback<AmrMissionTable> OnSaved { get; set; }
+
+    DxPopup? popup { get; set; }
+    AmrMissionTable missionTable { get; set; } = new AmrMissionTable();
+    List<FlowBase> listFlow { get; set; } = new List<FlowBase>();
+
+    FlowBase? editFlow;
+    bool isNewEdit;
+
+    public async Task ShowAsync()
+    {
+        missionTable = new AmrMissionTable
+        {
+            AmrSerialNumber = "",
+            Priority = 3
+        };
+        listFlow = new List<FlowBase>();
+        editFlow = null;
+        await popup!.ShowAsync();
+    }
+
+    void BeginAddFlow(EFlowType type)
+    {
+        isNewEdit = true;
+        editFlow = type switch
+        {
+            EFlowType.Move => new MoveFlowTable(),
+            EFlowType.Charge => new ChargeFlowTable { Percentage = 100 },
+            _ => null
+        };
+    }
+
+    void ConfirmEditFlow()
+    {
+        if (editFlow is null) return;
+        if (isNewEdit)
+            listFlow.Add(editFlow);
+        editFlow = null;
+        isNewEdit = false;
+    }
+
+    void CancelEditFlow()
+    {
+        editFlow = null;
+        isNewEdit = false;
+    }
+
+    async Task SaveAsync()
+    {
+        if (string.IsNullOrWhiteSpace(missionTable.AmrSerialNumber))
+            return;
+
+        if (listFlow.Count == 0)
+            return;
+
+        var now = DateTime.Now;
+        missionTable.Id = Guid.NewGuid();
+        missionTable.EstablishTime = now;
+        missionTable.FlowCount = listFlow.Count;
+
+        for (int i = 0; i < listFlow.Count; i++)
+        {
+            var f = listFlow[i];
+            f.Id = Guid.NewGuid();
+            f.MissionId = missionTable.Id;
+            f.AmrSerialNumber = missionTable.AmrSerialNumber;
+            f.Priority = missionTable.Priority;
+            f.EstablishTime = now.AddSeconds(i);
+        }
+
+        missionTable.Flows = listFlow.ToList();
+        await OnSaved.InvokeAsync(missionTable);
+        await CloseAsync();
+    }
+
+    async Task CloseAsync()
+    {
+        await popup!.CloseAsync();
+    }
+}
