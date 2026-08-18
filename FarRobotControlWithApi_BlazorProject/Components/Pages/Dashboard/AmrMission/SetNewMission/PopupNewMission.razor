@@ -46,13 +46,13 @@
                 <span class="flex-grow-1">
                     <PrintFlowHost Flow="flow" />
                 </span>
-                <DxButton Text="Delete" Click="@(() => _removeFlow(index))" RenderStyle="ButtonRenderStyle.Danger" />
+                <DxButton Text="Delete" Click="@(() => _clickRemoveFlow(index))" RenderStyle="ButtonRenderStyle.Danger" />
             </div>
         }
 
         <div class="mt-3 text-end">
-            <DxButton Text="Save" Click="SaveAsync" RenderStyle="ButtonRenderStyle.Primary" />
-            <DxButton Text="Close" Click="CloseAsync" />
+            <DxButton Text="Save" Click="_clickSave" Enabled="@_canClickSave()" RenderStyle="ButtonRenderStyle.Primary" />
+            <DxButton Text="Close" Click="_clickClose" />
         </div>
 
     </BodyContentTemplate>
@@ -91,7 +91,7 @@
         listFlow.Clear();
         editFlow = null;
         isEditFlow = false;
-        await popup.ShowAsync();
+        await popup?.ShowAsync();
     }
 
     void _clickAddFlow()
@@ -147,41 +147,69 @@
         }
     }
 
-    void _removeFlow(int index)
+    void _clickRemoveFlow(int index)
     {
         listFlow.RemoveAt(index);
     }
 
-    async Task SaveAsync()
+    bool _canClickSave()
     {
         if (string.IsNullOrWhiteSpace(missionTable.AmrSerialNumber))
-            return;
+            return false;
+
+        if (missionTable.Priority < 1 || missionTable.Priority > 5)
+            return false;
 
         if (listFlow.Count == 0)
-            return;
+            return false;
 
-        var now = DateTime.Now;
+        if (listFlow.Any(x => string.IsNullOrWhiteSpace(_getCellName(x))))
+            return false;
+
+        return true;
+    }
+
+    string _getCellName(FlowBase flow)
+    {
+        switch (flow)
+        {
+            case MoveFlowTable move:
+                return move.CellName;
+
+            case ChargeFlowTable charge:
+                return charge.CellName;
+
+            default:
+                return "";
+        }
+    }
+
+    async Task _clickSave()
+    {
+        DateTime now = DateTime.Now;
         missionTable.Id = Guid.NewGuid();
-        missionTable.EstablishTime = now;
         missionTable.FlowCount = listFlow.Count;
+        missionTable.EstablishTime = now;
 
         for (int i = 0; i < listFlow.Count; i++)
         {
-            var f = listFlow[i];
-            f.Id = Guid.NewGuid();
-            f.MissionId = missionTable.Id;
-            f.AmrSerialNumber = missionTable.AmrSerialNumber;
-            f.Priority = missionTable.Priority;
-            f.EstablishTime = now.AddSeconds(i);
+            FlowBase flow = listFlow[i];
+
+            flow.Id = Guid.NewGuid();
+            flow.MissionId = missionTable.Id;
+            flow.AmrSerialNumber = missionTable.AmrSerialNumber;
+            flow.Priority = missionTable.Priority;
+            flow.EstablishTime = now.AddMilliseconds(i);
         }
 
         missionTable.Flows = listFlow.ToList();
+
         await CbOnSaved.InvokeAsync(missionTable);
-        await CloseAsync();
+        await _clickClose();
     }
 
-    async Task CloseAsync()
+    async Task _clickClose()
     {
-        await popup!.CloseAsync();
+        await popup?.CloseAsync();
     }
 }
