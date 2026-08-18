@@ -2,8 +2,10 @@
 @using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.SetNewMission
 @using FarRobotControlWithApi_BlazorProject.EFModel
 @using FarRobotControlWithApi_BlazorProject.Services.Interface
+@using FarRobotControlWithApi_BlazorProject.UITools.ToastMessage
 @rendermode RenderMode.InteractiveServer
 @inject IMachineService machineService
+@inject IToastMessage IToastMsg
 
 <DxGrid Data="@listMission" @bind-SelectedDataItem="@targetMission" AllowSelectRowByClick="true" SelectionMode="GridSelectionMode.Single" HighlightRowOnHover="true" AutoCollapseDetailRow="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
     <ToolbarTemplate>
@@ -82,13 +84,16 @@
 
     async Task _onNewMissionSaved(AmrMissionTable mission)
     {
+        IToastMsg.NotifyInfo("Start Add Mission");
+
         if (await machineService.SetMission(mission))
         {
             await _loadMissionList();
+            IToastMsg.NotifySuccess("Add New Mission Success");
         }
         else
         {
-            
+            IToastMsg.NotifyError("Add New Mission Fail");
         }
     }
 
