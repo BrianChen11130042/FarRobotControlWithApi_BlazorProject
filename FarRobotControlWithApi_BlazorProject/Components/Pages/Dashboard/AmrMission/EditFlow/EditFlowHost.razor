@@ -2,10 +2,10 @@
 @switch (Flow)
 {
     case MoveFlowTable move:
-        <MoveFlowEdit Flow="move" />
+        <EditMoveFlow Flow="move" ListCellName="ListCellName" />
         break;
     case ChargeFlowTable charge:
-        <ChargeFlowEdit Flow="charge" />
+        <EditChargeFlow Flow="charge" ListCellName="ListCellName" />
         break;
 
     default:
@@ -15,4 +15,7 @@
 @code {
     [Parameter]
     public FlowBase? Flow { get; set; }
+
+    [Parameter, EditorRequired]
+    public List<string> ListCellName { get; set; } = new List<string>();
 }

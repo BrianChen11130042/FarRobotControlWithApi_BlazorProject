@@ -1,4 +1,4 @@
-﻿@using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.MissionFlowDetail
+﻿@using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.MissionDetail
 @using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.SetNewMission
 @using FarRobotControlWithApi_BlazorProject.EFModel
 @using FarRobotControlWithApi_BlazorProject.Services.Interface
@@ -31,7 +31,7 @@
     </DetailRowTemplate>
 </DxGrid>
 
-<PopupNewMission @ref="popUpNewMission" cbOnSaved="_onNewMissionSaved" />
+<PopupNewMission @ref="popUpNewMission" ListFlowType="listFlowType" ListAmrSerialNumber="listAmrSerialNumber" ListCellName="listCellName" CbOnSaved="_onNewMissionSaved" />
 
 @code {
     List<AmrMissionTable> listMission { get; set; } = new List<AmrMissionTable>();
@@ -41,6 +41,10 @@
     Object? targetMission { get; set; } = null;
     bool missionSelected => targetMission != null;
 
+    List<EFlowType> listFlowType { get; set; } = new List<EFlowType>();
+    List<string> listAmrSerialNumber { get; set; } = new List<string>();
+    List<string> listCellName { get; set; } = new List<string>();
+
     protected override async Task OnInitializedAsync()
     {
         await _loadMissionList();
@@ -49,6 +53,23 @@
     async Task _loadMissionList()
     {
         listMission = await machineService.GetAmrMissionInQueue();
+
+        listFlowType = new List<EFlowType>()
+        {
+            EFlowType.Move,
+            EFlowType.Charge
+        };
+
+        listAmrSerialNumber = new List<string>()
+        {
+            "smr_9901010401002t73j251"
+        };
+
+        listCellName = new List<string>()
+        {
+            "destination",
+            "Charger"
+        };
     }
 
     async Task _clickNewMission()

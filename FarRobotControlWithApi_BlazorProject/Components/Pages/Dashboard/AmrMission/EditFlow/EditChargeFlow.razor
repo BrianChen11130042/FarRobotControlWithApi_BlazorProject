@@ -1,0 +1,25 @@
+﻿@using FarRobotControlWithApi_BlazorProject.EFModel
+<DxFormLayout>
+    <DxFormLayoutItem Caption="Cell Name" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+        <DxComboBox Data="@ListCellName" @bind-Value="Flow.CellName" />
+    </DxFormLayoutItem>
+    <DxFormLayoutItem Caption="Percentage" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+        <DxSpinEdit @bind-Value="Flow.Percentage" MinValue="0" MaxValue="100" />
+    </DxFormLayoutItem>
+</DxFormLayout>
+
+@code {
+    [Parameter, EditorRequired]
+    public ChargeFlowTable Flow { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public List<string> ListCellName { get; set; } = new List<string>();
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrEmpty(Flow.CellName) && ListCellName.Count > 0)
+        {
+            Flow.CellName = ListCellName[0];
+        }
+    }
+}

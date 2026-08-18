@@ -1,11 +1,14 @@
-﻿@using FarRobotControlWithApi_BlazorProject.EFModel
+﻿@using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission
+@using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.EditFlow
+@using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.PrintFlow
+@using FarRobotControlWithApi_BlazorProject.EFModel
 
 <DxPopup @ref="popup" HeaderText="New Mission" ShowCloseButton="true" CloseOnOutsideClick="false" Width="50rem">
     <BodyContentTemplate Context="PopupContext">
 
         <DxFormLayout>
             <DxFormLayoutItem Caption="AMR Serial Number" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="8">
-                <DxComboBox Data="@listAmrSerialNumber" @bind-Value="missionTable.AmrSerialNumber" />
+                <DxComboBox Data="@ListAmrSerialNumber" @bind-Value="missionTable.AmrSerialNumber" />
             </DxFormLayoutItem>
 
             <DxFormLayoutItem Caption="Priority" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="8">
@@ -13,21 +16,21 @@
             </DxFormLayoutItem>
 
             <DxFormLayoutItem Caption="Flow" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="6">
-                <DxComboBox Data="@listFlowType" @bind-Value="editFlowType" />
+                <DxComboBox Data="@ListFlowType" @bind-Value="editFlowType" />
             </DxFormLayoutItem>
 
             <DxFormLayoutItem Caption="" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
-                <DxButton Text="+Flow" Click="BeginAddFlow" RenderStyle="ButtonRenderStyle.Secondary" />
+                <DxButton Text="+Flow" Click="_clickAddFlow" RenderStyle="ButtonRenderStyle.Secondary" />
             </DxFormLayoutItem>
         </DxFormLayout>
 
         @if (editFlow is not null)
         {
-            <div class="border p-2 mb-2" style="margin-top:12px;">
-                <FlowEditHost Flow="editFlow" />
+            <div class="border rounded p-2 mb-2" style="margin-top:12px;">
+                <EditFlowHost Flow="editFlow" ListCellName="ListCellName" />
                 <div class="mt-3">
-                    <DxButton Text="OK" Click="ConfirmEditFlow" RenderStyle="ButtonRenderStyle.Primary" />
-                    <DxButton Text="Cancel" Click="CancelEditFlow" />
+                    <DxButton Text="OK" Click="_clickConfirmEditFlow" RenderStyle="ButtonRenderStyle.Primary" />
+                    <DxButton Text="Cancel" Click="_clickCancelEditFlow" />
                 </div>
             </div>
         }
@@ -36,11 +39,14 @@
         {
             var index = i;
             var flow = listFlow[index];
+
             <div class="d-flex align-items-center gap-2 mb-2 border p-2" style="margin-top:12px;">
                 <span style="width:2rem;">@(index + 1)</span>
-                <span style="width:5rem;">@_flowTypeName(flow)</span>
-                <span class="flex-grow-1">@_flowSummary(flow)</span>
-                <DxButton Text="Delete" Click="@(() => RemoveFlow(index))" RenderStyle="ButtonRenderStyle.Danger" />
+                <span style="width:5rem;">@_getFlowType(flow)</span>
+                <span class="flex-grow-1">
+                    <PrintFlowHost Flow="flow" />
+                </span>
+                <DxButton Text="Delete" Click="@(() => _removeFlow(index))" RenderStyle="ButtonRenderStyle.Danger" />
             </div>
         }
 
@@ -53,52 +59,44 @@
 </DxPopup>
 
 @code {
-
-    public enum EFlowType
-    {
-        Move,
-        Charge
-    }
-
-    List<EFlowType> listFlowType { get; set; } = new List<EFlowType>()
-    {
-        EFlowType.Move,
-        EFlowType.Charge
-    };
-
-    List<string> listAmrSerialNumber { get; set; } = new List<string>()
-    {
-        "smr_9901010401002t73j251"
-    };
+    DxPopup? popup { get; set; } = null;
 
     [Parameter]
-    public EventCallback<AmrMissionTable> cbOnSaved { get; set; }
+    public EventCallback<AmrMissionTable> CbOnSaved { get; set; }
 
-    DxPopup? popup { get; set; } = null;
+    [Parameter, EditorRequired]
+    public List<EFlowType> ListFlowType { get; set; } = new List<EFlowType>();
+
+    [Parameter, EditorRequired]
+    public List<string> ListAmrSerialNumber { get; set; } = new List<string>();
+
+    [Parameter, EditorRequired]
+    public List<string> ListCellName { get; set; } = new List<string>();
+
     AmrMissionTable missionTable { get; set; } = new AmrMissionTable();
-    List<FlowBase> listFlow { get; set; } = new List<FlowBase>();
 
+    bool isEditFlow { get; set; } = false;
     EFlowType editFlowType { get; set; } = EFlowType.Move;
-    FlowBase? editFlow { get; set; }
-    bool isNewEdit;
+    FlowBase? editFlow { get; set; } = null;
+    List<FlowBase> listFlow { get; set; } = new List<FlowBase>();
 
     public async Task ShowAsync()
     {
         missionTable = new AmrMissionTable
         {
-            AmrSerialNumber = listAmrSerialNumber.FirstOrDefault() ?? "",
+            AmrSerialNumber = ListAmrSerialNumber.FirstOrDefault() ?? "",
             Priority = 3
         };
 
-        listFlow = new List<FlowBase>();
+        listFlow.Clear();
         editFlow = null;
+        isEditFlow = false;
         await popup.ShowAsync();
     }
 
-    void BeginAddFlow()
+    void _clickAddFlow()
     {
-        isNewEdit = true;
-
+        isEditFlow = true;
         editFlow = _getFlowTable(editFlowType);
     }
 
@@ -117,39 +115,42 @@
         }
     }
 
-    void ConfirmEditFlow()
+    void _clickConfirmEditFlow()
     {
-        if (editFlow is null) return;
-        if (isNewEdit)
+        if (editFlow != null && isEditFlow)
+        {
             listFlow.Add(editFlow);
+        }
+
         editFlow = null;
-        isNewEdit = false;
+        isEditFlow = false;
     }
 
-    void CancelEditFlow()
+    void _clickCancelEditFlow()
     {
         editFlow = null;
-        isNewEdit = false;
+        isEditFlow = false;
     }
 
-    void RemoveFlow(int index)
+    string _getFlowType(FlowBase flow)
+    {
+        switch (flow)
+        {
+            case MoveFlowTable move:
+                return EFlowType.Move.ToString();
+
+            case ChargeFlowTable charge:
+                return EFlowType.Charge.ToString();
+
+            default:
+                return "?";
+        }
+    }
+
+    void _removeFlow(int index)
     {
         listFlow.RemoveAt(index);
     }
-
-    string _flowTypeName(FlowBase flow) => flow switch
-    {
-        MoveFlowTable => "Move",
-        ChargeFlowTable => "Charge",
-        _ => "?"
-    };
-
-    string _flowSummary(FlowBase flow) => flow switch
-    {
-        MoveFlowTable m => m.CellName ?? "",
-        ChargeFlowTable c => $"{c.CellName} / {c.Percentage}%",
-        _ => ""
-    };
 
     async Task SaveAsync()
     {
@@ -175,7 +176,7 @@
         }
 
         missionTable.Flows = listFlow.ToList();
-        await cbOnSaved.InvokeAsync(missionTable);
+        await CbOnSaved.InvokeAsync(missionTable);
         await CloseAsync();
     }
 
