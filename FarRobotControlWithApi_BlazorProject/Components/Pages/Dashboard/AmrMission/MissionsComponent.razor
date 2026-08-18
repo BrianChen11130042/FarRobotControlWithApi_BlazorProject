@@ -6,6 +6,7 @@
 @rendermode RenderMode.InteractiveServer
 @inject IMachineService machineService
 @inject IToastMessage IToastMsg
+@implements IDisposable
 
 <DxGrid Data="@listMission" @bind-SelectedDataItem="@targetMission" AllowSelectRowByClick="true" SelectionMode="GridSelectionMode.Single" HighlightRowOnHover="true" AutoCollapseDetailRow="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
     <ToolbarTemplate>
@@ -49,6 +50,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        machineService.dgAmrMissionUpdate += _handleMissionUpdated;
+        machineService.dgInitResult += _handleInitResult;
         await _loadMissionList();
     }
 
@@ -100,5 +103,29 @@
     async Task _clickCancelMission()
     {
         AmrMissionTable missionTable = (AmrMissionTable)targetMission;
+    }
+
+    async Task _handleMissionUpdated(List<AmrMissionTable> missions)
+    {
+        listMission = missions; 
+        await InvokeAsync(StateHasChanged);
+    }
+
+    async Task _handleInitResult(bool success, string msg)
+    {
+        if (success)
+        {
+            IToastMsg.NotifySuccess(msg);
+        }
+        else
+        {
+            IToastMsg.NotifyError(msg);
+        }
+    }
+
+    public void Dispose()
+    {
+        machineService.dgAmrMissionUpdate -= _handleMissionUpdated;
+        machineService.dgInitResult -= _handleInitResult;
     }
 }

@@ -17,6 +17,8 @@ namespace FarRobotControlWithApi_BlazorProject.Services.Interface
 
         Task Initial();
 
+        event dgInitResult dgInitResult;
+
         //任務
         Task<List<AmrMissionTable>> GetAmrMissionInQueue();
 

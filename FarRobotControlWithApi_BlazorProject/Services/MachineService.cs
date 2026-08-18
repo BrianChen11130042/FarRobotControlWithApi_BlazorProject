@@ -18,10 +18,13 @@ namespace FarRobotControlWithApi_BlazorProject.Services
             this.scope = scope;
 
             scope.observerLibrary.AddMissionObserver(this);
+            scope.observerLibrary.AddSystemControlObserver(this);
         }
     }
 
-    public partial class MachineService
+    public delegate Task dgInitResult(bool success, string msg);
+
+    public partial class MachineService : ISystemControlObserver
     {
         public async Task<List<WebApiClientConfig>> GetWebApiClientConfig()
         {
@@ -72,6 +75,18 @@ namespace FarRobotControlWithApi_BlazorProject.Services
         public async Task Initial()
         {
             scope.initAll();
+        }
+
+        public event dgInitResult dgInitResult;
+
+        public async Task HandleInitialResult(bool success, string msg)
+        {
+            dgInitResult?.Invoke(success, msg);
+        }
+
+        public async Task HandleDisconnect()
+        {
+            
         }
     }
 

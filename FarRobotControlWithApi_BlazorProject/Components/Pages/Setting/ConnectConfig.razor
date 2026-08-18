@@ -7,6 +7,7 @@
 @rendermode InteractiveServer
 @inject IMachineService IService
 @inject IToastMessage IToastMsg
+@implements IDisposable
 
 <WebApiConfigGrid Title="Web Api Client Config"
 	              Data="listWebApiClient"
@@ -31,47 +32,65 @@
 
 @code {
 
-	List<WebApiClientConfig> listWebApiClient { get; set; } = new List<WebApiClientConfig>();
-	List<AmrControlConfig> listAmrControl { get; set; } = new List<AmrControlConfig>();
+    List<WebApiClientConfig> listWebApiClient { get; set; } = new List<WebApiClientConfig>();
+    List<AmrControlConfig> listAmrControl { get; set; } = new List<AmrControlConfig>();
 
-	protected override async Task OnInitializedAsync()
-	{
-		await ReadPageData();
+    protected override async Task OnInitializedAsync()
+    {
+        IService.dgInitResult += _handleInitResult;
+        await ReadPageData();
+    }
+
+    async Task ReadPageData()
+    {
+        listWebApiClient = await IService.GetWebApiClientConfig();
+        listAmrControl = await IService.GetAmrControlConfig();
+    }
+
+    public async Task editWebApiClient(GridEditModelSavingEventArgs e)
+    {
+        WebApiClientConfig editData = (WebApiClientConfig)e.EditModel;
+
+        await IService.SetWebApiClientConfig(editData);
+
+        IToastMsg.NotifySuccess("Modify Success");
+
+        await ReadPageData();
+    }
+
+    public async Task editAmrControl(GridEditModelSavingEventArgs e)
+    {
+        AmrControlConfig editData = (AmrControlConfig)e.EditModel;
+
+        await IService.SetAmrControlConfig(editData);
+
+        IToastMsg.NotifySuccess("Modify Success");
+
+        await ReadPageData();
+    }
+
+    async Task initial()
+    {
+        IToastMsg.NotifyInfo("Init Start");
+
+        await IService.Initial();
+    }
+
+    async Task _handleInitResult(bool success, string msg)
+    {
+		if (success)
+		{
+			IToastMsg.NotifySuccess(msg);
+		}
+		else
+		{
+			IToastMsg.NotifyError(msg);
+		}
 	}
 
-	async Task ReadPageData()
-	{
-		listWebApiClient = await IService.GetWebApiClientConfig();
-		listAmrControl = await IService.GetAmrControlConfig();
-	}
-
-	public async Task editWebApiClient(GridEditModelSavingEventArgs e)
-	{
-		WebApiClientConfig editData = (WebApiClientConfig)e.EditModel;
-
-		await IService.SetWebApiClientConfig(editData);
-
-		IToastMsg.NotifySuccess("Modify Success");
-
-		await ReadPageData();
-	}
-
-	public async Task editAmrControl(GridEditModelSavingEventArgs e)
-	{
-		AmrControlConfig editData = (AmrControlConfig)e.EditModel;
-
-		await IService.SetAmrControlConfig(editData);
-
-		IToastMsg.NotifySuccess("Modify Success");
-
-		await ReadPageData();
-	}
-
-	async Task initial()
-	{
-		IToastMsg.NotifyInfo("Init Start");
-
-		await IService.Initial();
-	}
+    public void Dispose()
+    {
+        IService.dgInitResult -= _handleInitResult;
+    }
 
 }
