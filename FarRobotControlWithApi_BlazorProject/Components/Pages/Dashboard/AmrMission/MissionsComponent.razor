@@ -5,11 +5,11 @@
 @rendermode RenderMode.InteractiveServer
 @inject IMachineService machineService
 
-<DxGrid Data="@listMission" @bind-SelectedDataItem="@targetMissionObj" AllowSelectRowByClick="true" SelectionMode="GridSelectionMode.Single" HighlightRowOnHover="true" AutoCollapseDetailRow="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
+<DxGrid Data="@listMission" @bind-SelectedDataItem="@targetMission" AllowSelectRowByClick="true" SelectionMode="GridSelectionMode.Single" HighlightRowOnHover="true" AutoCollapseDetailRow="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
     <ToolbarTemplate>
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
-            <DxToolbarItem IconCssClass="oi oi-plus" Click="NewMissionClick" />
-            <DxToolbarItem IconCssClass="oi oi-media-stop" Enabled="@missionSelected" Click="CancelMissionClick" RenderStyle="ButtonRenderStyle.Danger"/>
+            <DxToolbarItem IconCssClass="oi oi-plus" Click="_clickNewMission" />
+            <DxToolbarItem IconCssClass="oi oi-media-stop" Enabled="@missionSelected" Click="_clickCancelMission" RenderStyle="ButtonRenderStyle.Danger"/>
         </DxToolbar>
     </ToolbarTemplate>
 
@@ -29,41 +29,41 @@
     <DetailRowTemplate Context="Context">
         <MissionFlowsDetail Mission="@(Context.DataItem as AmrMissionTable)" />
     </DetailRowTemplate>
-
 </DxGrid>
 
-<NewMissionPopup @ref="newMissionPopup" OnSaved="OnNewMissionSaved" />
+<PopupNewMission @ref="popUpNewMission" cbOnSaved="_onNewMissionSaved" />
 
 @code {
     List<AmrMissionTable> listMission { get; set; } = new List<AmrMissionTable>();
-    Object? targetMissionObj { get;set; }
-    bool missionSelected => targetMissionObj != null;
 
-    NewMissionPopup? newMissionPopup { get; set; }
+    PopupNewMission? popUpNewMission { get; set; } = null;
+
+    Object? targetMission { get; set; } = null;
+    bool missionSelected => targetMission != null;
 
     protected override async Task OnInitializedAsync()
     {
-        await _loadAmrMissionList();
+        await _loadMissionList();
     }
 
-    async Task _loadAmrMissionList()
+    async Task _loadMissionList()
     {
         listMission = await machineService.GetAmrMissionInQueue();
     }
 
-    async Task NewMissionClick()
+    async Task _clickNewMission()
     {
-        if (newMissionPopup != null)
+        if (popUpNewMission != null)
         {
-            await newMissionPopup.ShowAsync();
+            await popUpNewMission.ShowAsync();
         }
     }
 
-    async Task OnNewMissionSaved(AmrMissionTable mission)
+    async Task _onNewMissionSaved(AmrMissionTable mission)
     {
         if (await machineService.SetMission(mission))
         {
-            await _loadAmrMissionList();
+            await _loadMissionList();
         }
         else
         {
@@ -71,8 +71,8 @@
         }
     }
 
-    async Task CancelMissionClick()
+    async Task _clickCancelMission()
     {
-        AmrMissionTable missionTable = (AmrMissionTable)targetMissionObj;
+        AmrMissionTable missionTable = (AmrMissionTable)targetMission;
     }
 }

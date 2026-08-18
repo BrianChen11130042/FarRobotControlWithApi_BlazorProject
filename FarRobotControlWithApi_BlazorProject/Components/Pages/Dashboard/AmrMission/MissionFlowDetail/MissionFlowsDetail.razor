@@ -3,14 +3,14 @@
 <DxGrid Data="@Flows" PageSize="20" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
     <Columns>
         <DxGridDataColumn Caption="FlowType">
-            <CellDisplayTemplate Context="cell">
-                @_getFlowType(cell.DataItem)
+            <CellDisplayTemplate Context="TypeContext">
+                @_getFlowType(TypeContext.DataItem)
             </CellDisplayTemplate>
         </DxGridDataColumn>
 
         <DxGridDataColumn Caption="Detail" Width="320px">
-            <CellDisplayTemplate Context="cell">
-                <FlowDetailHost Flow="@(cell.DataItem as FlowBase)" />
+            <CellDisplayTemplate Context="DetailContext">
+                <FlowDetailHost Flow="@(DetailContext.DataItem as FlowBase)" />
             </CellDisplayTemplate>
         </DxGridDataColumn>
 
@@ -22,7 +22,6 @@
         <DxGridDataColumn FieldName="@nameof(FlowBase.ErrorMessage)" />
         <DxGridDataColumn FieldName="@nameof(FlowBase.CancelRequest)" />
         <DxGridDataColumn FieldName="@nameof(FlowBase.CancelTime)" DisplayFormat="g" />
-
     </Columns>
 </DxGrid>
 
@@ -40,7 +39,6 @@
         {
             case MoveFlowTable moveFlow:
                 return "Move";
-
 
             case ChargeFlowTable chargeFlow:
                 return "Charge";

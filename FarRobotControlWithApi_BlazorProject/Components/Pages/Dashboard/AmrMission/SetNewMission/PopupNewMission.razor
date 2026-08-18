@@ -1,10 +1,9 @@
 ﻿@using FarRobotControlWithApi_BlazorProject.EFModel
 
 <DxPopup @ref="popup" HeaderText="New Mission" ShowCloseButton="true" CloseOnOutsideClick="false" Width="50rem">
-    <BodyContentTemplate Context="popupContext">
+    <BodyContentTemplate Context="PopupContext">
 
         <DxFormLayout>
-
             <DxFormLayoutItem Caption="AMR Serial Number" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="8">
                 <DxComboBox Data="@listAmrSerialNumber" @bind-Value="missionTable.AmrSerialNumber" />
             </DxFormLayoutItem>
@@ -20,7 +19,6 @@
             <DxFormLayoutItem Caption="" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="2">
                 <DxButton Text="+Flow" Click="BeginAddFlow" RenderStyle="ButtonRenderStyle.Secondary" />
             </DxFormLayoutItem>
-
         </DxFormLayout>
 
         @if (editFlow is not null)
@@ -74,9 +72,9 @@
     };
 
     [Parameter]
-    public EventCallback<AmrMissionTable> OnSaved { get; set; }
+    public EventCallback<AmrMissionTable> cbOnSaved { get; set; }
 
-    DxPopup? popup { get; set; }
+    DxPopup? popup { get; set; } = null;
     AmrMissionTable missionTable { get; set; } = new AmrMissionTable();
     List<FlowBase> listFlow { get; set; } = new List<FlowBase>();
 
@@ -94,7 +92,7 @@
 
         listFlow = new List<FlowBase>();
         editFlow = null;
-        await popup?.ShowAsync();
+        await popup.ShowAsync();
     }
 
     void BeginAddFlow()
@@ -177,7 +175,7 @@
         }
 
         missionTable.Flows = listFlow.ToList();
-        await OnSaved.InvokeAsync(missionTable);
+        await cbOnSaved.InvokeAsync(missionTable);
         await CloseAsync();
     }
 
