@@ -190,31 +190,46 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
         {
             var amrMission = listAmrMissionInQueue.FirstOrDefault(x => x.Id == data.MissionId);
 
-            if(amrMission != null)
-            {
-                var target = amrMission.Flows.FirstOrDefault(x => x.Id == data.Id);
+            if (amrMission == null)
+                return;
 
-                if(target != null)
+            var target = amrMission.Flows.FirstOrDefault(x => x.Id == data.Id);
+
+            if (target != null)
+            {
+                target.MissionId = data.MissionId;
+                target.AmrSerialNumber = data.AmrSerialNumber;
+                target.FlowId = data.FlowId;
+                target.Priority = data.Priority;
+                target.State = data.State;
+                target.StateString = data.StateString;
+                target.CompletePercent = data.CompletePercent;
+                target.EstablishTime = data.EstablishTime;
+                target.StartTime = data.StartTime;
+                target.ErrorCode = data.ErrorCode;
+                target.ErrorMessage = data.ErrorMessage;
+                target.FinishTime = data.FinishTime;
+                target.CancelRequest = data.CancelRequest;
+                target.CancelTime = data.CancelTime;
+
+                switch(data)
                 {
-                    target.MissionId = data.MissionId;
-                    target.AmrSerialNumber = data.AmrSerialNumber;
-                    target.FlowId = data.FlowId;
-                    target.Priority = data.Priority;
-                    target.State = data.State;
-                    target.StateString = data.StateString;
-                    target.CompletePercent = data.CompletePercent;
-                    target.EstablishTime = data.EstablishTime;
-                    target.StartTime = data.StartTime;
-                    target.ErrorCode = data.ErrorCode;
-                    target.ErrorMessage = data.ErrorMessage;
-                    target.FinishTime = data.FinishTime;
-                    target.CancelRequest = data.CancelRequest;
-                    target.CancelTime = data.CancelTime;
+                    case MoveFlowTable moveData when target is MoveFlowTable moveTarget:
+                        moveTarget.CellName = moveData.CellName;
+                        break;
+
+                    case ChargeFlowTable chargeData when target is ChargeFlowTable chargeTarget:
+                        chargeTarget.CellName = chargeData.CellName;
+                        chargeTarget.Percentage = chargeData.Percentage;
+                        break;
+
+                    default:
+                        break;
                 }
-                else
-                {
-                    amrMission.Flows.Add(data);
-                }
+            }
+            else
+            {
+                amrMission.Flows.Add(data);
             }
         }
     }

@@ -38,6 +38,26 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
         {
             return pack.GetProgressByFlowId();
         }
+
+        public bool IsNeedGetArtifactStatus()
+        {
+            return pack.IsNeedGetArtifactStatus();
+        }
+
+        public Task<bool> GetArtifactStatusByArtifactId()
+        {
+            return pack.GetArtifactStatusByArtifactId();
+        }
+
+        public Task<bool> UpsertMissionTable()
+        {
+            return pack.UpsertMissionTable();
+        }
+
+        public Task NotifyMissionUpdated()
+        {
+            return pack.NotifyMissionUpdated();
+        }
     }
 
     public enum EMonitorMission
@@ -46,7 +66,8 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
         CheckStartedMission,
 
         GetFlowProgress,
-        GetArtifactStatus
+        GetArtifactStatus,
+        UpsertMissionTable,
     }
 
     public partial class SwarmCoreMonitorMissionTask : FSMBase<EMonitorMission, int>
@@ -110,11 +131,55 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
                         case 0:
                             if(await GetProgressByFlowId())
                             {
-                                
+                                if(IsNeedGetArtifactStatus())
+                                {
+                                    Set(EMonitorMission.GetArtifactStatus, 0);
+                                }
+                                else
+                                {
+                                    Set(EMonitorMission.UpsertMissionTable, 0);
+                                }
                             }
                             else
                             {
+                                SaveState();
+                                Set(ES1.Error, EMonitorMission.None, 0);
+                            }
+                            break;
+                    }
+                    break;
 
+                case EMonitorMission.GetArtifactStatus:
+                    switch(S3)
+                    {
+                        case 0:
+                            if(await GetArtifactStatusByArtifactId())
+                            {
+                                Set(EMonitorMission.UpsertMissionTable, 0);
+                            }
+                            else
+                            {
+                                SaveState();
+                                Set(ES1.Error, EMonitorMission.None, 0);
+                            }
+                            break;
+                    }
+                    break;
+
+                case EMonitorMission.UpsertMissionTable:
+                    switch(S3)
+                    {
+                        case 0:
+                            if (await UpsertMissionTable())
+                            {
+                                await NotifyMissionUpdated();
+
+                                Set(EMonitorMission.CheckStartedMission, 10);
+                            }
+                            else
+                            {
+                                SaveState();
+                                Set(ES1.Error, EMonitorMission.None, 0);
                             }
                             break;
                     }

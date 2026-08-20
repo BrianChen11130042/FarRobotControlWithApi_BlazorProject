@@ -11,5 +11,13 @@
         Task<bool> GetStartMissionTarget();
 
         Task<bool> GetProgressByFlowId();
+
+        bool IsNeedGetArtifactStatus();
+
+        Task<bool> GetArtifactStatusByArtifactId();
+
+        Task<bool> UpsertMissionTable();
+
+        Task NotifyMissionUpdated();
     }
 }

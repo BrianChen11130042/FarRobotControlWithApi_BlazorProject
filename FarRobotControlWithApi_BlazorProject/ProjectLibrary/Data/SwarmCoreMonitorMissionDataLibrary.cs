@@ -112,6 +112,59 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
             return true;
         }
 
+        public async Task<bool> UpsertMissionTable()
+        {
+            var result = await IMissionTableOp.UpsertMissionTable(TargetStartedMission);
+
+            if (!result.status)
+            {
+                await WriteNLogError(result.msg);
+                return result.status;
+            }
+
+            foreach (FlowBase flow in TargetStartedMission.Flows)
+            {
+                switch (flow)
+                {
+                    case MoveFlowTable moveflow:
+                        if (!await _upsertFlow<MoveFlowTable>(moveflow))
+                        {
+                            return false;
+                        }
+                        break;
+
+                    case ChargeFlowTable chargeflow:
+                        if (!await _upsertFlow<ChargeFlowTable>(chargeflow))
+                        {
+                            return false;
+                        }
+                        break;
+                }
+            }
+
+            return true;
+        }
+
+        async Task<bool> _upsertFlow<T>(T flow) where T : FlowBase
+        {
+            var result = await IMissionTableOp.UpsertFlow<T>(flow);
+
+            if (result.status)
+            {
+                return result.status;
+            }
+            else
+            {
+                await WriteNLogError(result.msg);
+                return result.status;
+            }
+        }
+
+        public async Task NotifyMissionUpdated()
+        {
+            await IMissionObser.NotifyMissionUpdated(IMissionTableOp.listAmrMissionInQueue);
+        }
+
         public async Task WriteNLogError(string log)
         {
             await _writeNLogError(log);

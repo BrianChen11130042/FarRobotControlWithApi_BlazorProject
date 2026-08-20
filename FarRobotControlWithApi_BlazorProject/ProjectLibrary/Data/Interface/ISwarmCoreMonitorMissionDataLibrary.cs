@@ -14,6 +14,11 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface
 
         Task<bool> GetStartedMissionTableTarget();
 
+        Task<bool> UpsertMissionTable();
+
+
+        Task NotifyMissionUpdated();
+
         Task WriteNLogError(string log);
 
         Task WriteNLogInform(string log);

@@ -1,5 +1,4 @@
-﻿using Azure;
-using CommonLibraryB.Library.AmrControl.Adapter;
+﻿using CommonLibraryB.Library.AmrControl.Adapter;
 using CommonLibraryB.Library.AmrControl.Package;
 using FarRobotControlWithApi_BlazorProject.EFModel;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface;
@@ -133,5 +132,49 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
             }
         }
 
+        public bool IsNeedGetArtifactStatus()
+        {
+            foreach(FlowBase flow in IDataLib.TargetStartedMission.Flows)
+            {
+                switch(flow)
+                {
+                    default:
+                        break;
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<bool> GetArtifactStatusByArtifactId()
+        {
+            foreach(FlowBase flow in IDataLib.TargetStartedMission.Flows)
+            {
+                switch(flow)
+                {
+                    default:
+                        break;
+                }
+            }
+
+            return true;
+        }
+
+        public async Task<bool> UpsertMissionTable()
+        {
+            if(await IDataLib.UpsertMissionTable())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task NotifyMissionUpdated()
+        {
+            await IDataLib.NotifyMissionUpdated();
+        }
     }
 }
