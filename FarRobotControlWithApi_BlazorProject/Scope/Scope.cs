@@ -28,6 +28,7 @@
 
             _initSysControlTask();
             _initSetMissionTask();
+            _initMonitorMissionTask();
             _initRegularTask();
             _initThreadTask();
             _initThread();

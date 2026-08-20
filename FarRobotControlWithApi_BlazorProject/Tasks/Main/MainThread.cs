@@ -1,5 +1,5 @@
 ﻿using CommonLibraryB.Base.FiniteStateMachine;
-using DevExpress.Utils.Filtering.Internal;
+using FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission;
 using FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreRegular;
 using FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission;
 using FarRobotControlWithApi_BlazorProject.Tasks.SystemControl;
@@ -12,14 +12,17 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.Main
         readonly SystemControlThread controlThread;
         readonly SwarmCoreRegularThread regularThread;
         readonly SwarmCoreSetMissionThread setMissionThread;
+        readonly SwarmCoreMonitorMissionThread monitorMissionThread;
 
         public MainThread(SystemControlThread controlThread, 
                           SwarmCoreRegularThread regularThread, 
-                          SwarmCoreSetMissionThread setMissionThread)
+                          SwarmCoreSetMissionThread setMissionThread,
+                          SwarmCoreMonitorMissionThread monitorMissionThread)
         {
             this.controlThread = controlThread;
             this.regularThread = regularThread;
             this.setMissionThread = setMissionThread;
+            this.monitorMissionThread = monitorMissionThread;
 
             interval = 1;
         }
@@ -55,9 +58,11 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.Main
                         {
                             regularThread.ResetKey();
                             setMissionThread.ResetKey();
+                            monitorMissionThread.ResetKey();
 
                             regularThread.Set(ES1.Init, ESwarmCoreRegularThread.None, 0);
                             setMissionThread.Set(ES1.Init, ESetMissionThread.None, 0);
+                            monitorMissionThread.Set(ES1.Init, EMonitorMissionThread.None, 0);
 
                             Set(ES1.Action, EMainThread.Monitor, 0);
                         }
@@ -97,6 +102,18 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.Main
 
                         case 10:
                             if(setMissionThread.isError)
+                            {
+                                SaveState();
+                                Set(ES1.Error, EMainThread.None, 0);
+                            }
+                            else
+                            {
+                                Set(20);
+                            }
+                            break;
+
+                        case 20:
+                            if(monitorMissionThread.isError)
                             {
                                 SaveState();
                                 Set(ES1.Error, EMainThread.None, 0);

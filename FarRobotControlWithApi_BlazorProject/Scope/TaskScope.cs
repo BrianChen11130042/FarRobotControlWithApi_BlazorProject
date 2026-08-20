@@ -1,10 +1,12 @@
 ﻿using CommonLibraryB.Base.FiniteStateMachine;
 using FarRobotControlWithApi_BlazorProject.EquipName.AmrControl;
+using FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMission;
 using FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreRegular;
 using FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission;
 using FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Error;
 using FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initial;
 using FarRobotControlWithApi_BlazorProject.Tasks.Main;
+using FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission;
 using FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreRegular;
 using FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission;
 using FarRobotControlWithApi_BlazorProject.Tasks.SystemControl;
@@ -51,6 +53,21 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
             swarmCoreSetMissionTask.Set(ES1.None, ESetMission.None, 0);
         }
 
+        public SwarmCoreMonitorMissionTaskPack<EAmrControl> swarmCoreMonitorMissionTaskPack;
+
+        public SwarmCoreMonitorMissionTask swarmCoreMonitorMissionTask;
+
+        void _initMonitorMissionTask()
+        {
+            swarmCoreMonitorMissionTaskPack = new SwarmCoreMonitorMissionTaskPack<EAmrControl>(EAmrControl.AmrControl,
+                                                                                               amrControlLibrary,
+                                                                                               amrControlLibrary,
+                                                                                               swarmCoreMonitorMissionDataLibrary);
+
+            swarmCoreMonitorMissionTask = new SwarmCoreMonitorMissionTask(swarmCoreMonitorMissionTaskPack);
+            swarmCoreMonitorMissionTask.Set(ES1.None, EMonitorMission.None, 0);
+        }
+
         public SwarmCoreRegularTaskPack<EAmrControl> swarmCoreRegularTaskPack;
 
         public SwarmCoreRegularTask swarmCoreRegularTask;
@@ -69,6 +86,7 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
         public SystemControlThread systemControlThread;
         public SwarmCoreRegularThread swarmCoreRegularThread;
         public SwarmCoreSetMissionThread swarmCoreSetMissionThread;
+        public SwarmCoreMonitorMissionThread swarmCoreMonitorMissionThread;
 
         public MainThread mainThread;
 
@@ -83,19 +101,24 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
             swarmCoreSetMissionThread = new SwarmCoreSetMissionThread(swarmCoreSetMissionTask);
             swarmCoreSetMissionThread.Set(ES1.None, ESetMissionThread.None, 0);
 
-            mainThread = new MainThread(systemControlThread, swarmCoreRegularThread, swarmCoreSetMissionThread);
+            swarmCoreMonitorMissionThread = new SwarmCoreMonitorMissionThread(swarmCoreMonitorMissionTask);
+            swarmCoreMonitorMissionThread.Set(ES1.None, EMonitorMissionThread.None, 0);
+
+            mainThread = new MainThread(systemControlThread, swarmCoreRegularThread, swarmCoreSetMissionThread, swarmCoreMonitorMissionThread);
             mainThread.Set(ES1.Init, EMainThread.None, 0);
         }
 
         private CancellationTokenSource _ctsMain;
         private CancellationTokenSource _ctsSystemControl;
         private CancellationTokenSource _ctsRegular;
-        private CancellationTokenSource _ctsSetMisison;
+        private CancellationTokenSource _ctsSetMission;
+        private CancellationTokenSource _ctsMonitorMission;
 
         private Task _mainTask;
         private Task _systemControlTask;
         private Task _regularTask;
         private Task _setMisisonTask;
+        private Task _monitorMissionTask;
 
         public void _initThread()
         {
@@ -119,8 +142,14 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
 
             if(_setMisisonTask == null || _setMisisonTask.IsCompleted)
             {
-                _ctsSetMisison = new CancellationTokenSource();
-                _setMisisonTask = StartLongRunning(async() => await RunSetMissionAsync(_ctsSetMisison.Token));
+                _ctsSetMission = new CancellationTokenSource();
+                _setMisisonTask = StartLongRunning(async() => await RunSetMissionAsync(_ctsSetMission.Token));
+            }
+
+            if(_monitorMissionTask == null || _monitorMissionTask.IsCompleted)
+            {
+                _ctsMonitorMission = new CancellationTokenSource();
+                _monitorMissionTask = StartLongRunning(async () => await RunMonitorMissionAsync(_ctsMonitorMission.Token));
             }
         }
 
@@ -207,15 +236,34 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
             }
         }
 
+        private async Task RunMonitorMissionAsync(CancellationToken token)
+        {
+            while(!token.IsCancellationRequested)
+            {
+                try
+                {
+                    await swarmCoreMonitorMissionThread.Run();
+
+                    await Task.Delay(50, token);
+                }
+                catch (TaskCanceledException) { }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Monitor Mission 例外: {ex}");
+                }
+            }
+        }
+
         public void _stopThread()
         {
             _ctsMain?.Cancel();
             _ctsSystemControl?.Cancel();
             _ctsRegular?.Cancel();
-            _ctsSetMisison?.Cancel();
+            _ctsSetMission?.Cancel();
+            _ctsMonitorMission?.Cancel();
 
             // 強制等待所有 Task 結束，最多等 60 秒，避免死結
-            Task.WaitAll(new[] { _mainTask, _systemControlTask, _regularTask, _setMisisonTask }
+            Task.WaitAll(new[] { _mainTask, _systemControlTask, _regularTask, _setMisisonTask, _monitorMissionTask }
                         .Where(t => t != null)
                         .ToArray(), TimeSpan.FromSeconds(60));
 

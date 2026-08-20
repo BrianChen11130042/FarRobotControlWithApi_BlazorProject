@@ -1,4 +1,5 @@
 ﻿using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data;
+using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,7 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
 
         public SwarmCoreRegularDataLibary swarmCoreRegularDataLibary;
         public SwarmCoreSetMissionDataLibrary swarmCoreSetMissionDataLibrary;
+        public SwarmCoreMonitorMissionDataLibrary swarmCoreMonitorMissionDataLibrary;
         public InitialDataLibrary initialDataLibrary;
         public ErrorDataLibrary errorDataLibrary;
 
@@ -29,6 +31,12 @@ namespace FarRobotControlWithApi_BlazorProject.Scope
                                                                                 missionTableLibrary,
                                                                                 observerLibrary, 
                                                                                 observerLibrary);
+
+            swarmCoreMonitorMissionDataLibrary = new SwarmCoreMonitorMissionDataLibrary(logTableLibrary,
+                                                                                        missionTableLibrary,
+                                                                                        observerLibrary,
+                                                                                        observerLibrary);
+
             initialDataLibrary = new InitialDataLibrary(logTableLibrary,
                                                         missionTableLibrary,
                                                         observerLibrary,
