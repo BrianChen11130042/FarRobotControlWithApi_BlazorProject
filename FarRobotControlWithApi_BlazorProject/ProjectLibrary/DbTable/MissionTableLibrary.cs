@@ -86,6 +86,19 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
             return newMission;
         }
 
+        public async Task<List<AmrMissionTable>> GetStartedMissionTableList()
+        {
+            List<AmrMissionTable> list = listAmrMissionInQueue.Where(x => x.IsStart == true
+                                                                       && x.IsFinish == false
+                                                                       && x.IsCancel == false
+                                                                       && x.FlowCount != 0
+                                                                       && x.Flows.Count == x.FlowCount)
+                                                              .OrderBy(x => x.EstablishTime)
+                                                              .ToList();
+
+            return list;
+        }
+
         public async Task<(bool status, string msg)> UpsertMissionTable(AmrMissionTable data)
         {
             try

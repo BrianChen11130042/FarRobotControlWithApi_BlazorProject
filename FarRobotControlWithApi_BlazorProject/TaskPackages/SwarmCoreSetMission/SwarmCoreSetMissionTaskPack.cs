@@ -96,14 +96,14 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
                 switch(flow)
                 {
                     case MoveFlowTable moveFlow:
-                        if(!await _DispatchMoveFlow(moveFlow))
+                        if(!await _dispatchMoveFlow(moveFlow))
                         {
                             return false;
                         }
                         break;
 
                     case ChargeFlowTable chargeFlow:
-                        if(!await _DispatchChargeFlow(chargeFlow))
+                        if(!await _dispatchChargeFlow(chargeFlow))
                         {
                             return false;
                         }
@@ -119,7 +119,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             return true;
         }
 
-        async Task<bool> _DispatchMoveFlow(MoveFlowTable moveFlow)
+        async Task<bool> _dispatchMoveFlow(MoveFlowTable moveFlow)
         {
             if (moveFlow.IsStart == true)
                 return true;
@@ -142,7 +142,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             }
         }
 
-        async Task<bool> _DispatchChargeFlow(ChargeFlowTable chargeFlow)
+        async Task<bool> _dispatchChargeFlow(ChargeFlowTable chargeFlow)
         {
             if (chargeFlow.IsStart == true)
                 return true;
