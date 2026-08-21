@@ -29,9 +29,9 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
             return pack.IsNextStartedMissionTarget();
         }
 
-        public Task<bool> GetStartMissionTarget()
+        public Task<bool> GetStartedMissionTarget()
         {
-            return pack.GetStartMissionTarget();
+            return pack.GetStartedMissionTarget();
         }
 
         public Task<bool> GetProgressByFlowId()
@@ -107,7 +107,7 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
                         case 10:
                             if(IsNextStartedMissionTarget())
                             {
-                                if(await GetStartMissionTarget())
+                                if(await GetStartedMissionTarget())
                                 {
                                     Set(EMonitorMission.GetFlowProgress, 0);
                                 }

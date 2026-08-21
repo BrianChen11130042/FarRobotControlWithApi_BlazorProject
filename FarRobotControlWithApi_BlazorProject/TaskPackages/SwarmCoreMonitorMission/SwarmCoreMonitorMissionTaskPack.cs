@@ -72,7 +72,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
             }
         }
 
-        public async Task<bool> GetStartMissionTarget()
+        public async Task<bool> GetStartedMissionTarget()
         {
             if (await IDataLib.GetStartedMissionTableTarget())
             {

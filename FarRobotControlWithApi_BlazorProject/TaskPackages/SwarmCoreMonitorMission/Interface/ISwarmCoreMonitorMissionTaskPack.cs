@@ -8,7 +8,7 @@
 
         bool IsNextStartedMissionTarget();
 
-        Task<bool> GetStartMissionTarget();
+        Task<bool> GetStartedMissionTarget();
 
         Task<bool> GetProgressByFlowId();
 
