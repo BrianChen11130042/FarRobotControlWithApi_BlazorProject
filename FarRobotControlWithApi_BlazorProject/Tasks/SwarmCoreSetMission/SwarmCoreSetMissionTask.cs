@@ -23,14 +23,9 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission
             return pack.IsNewMission();
         }
 
-        public bool IsCancelMissionBeforeDispatch()
+        public bool IsCancelMission()
         {
-            return pack.IsCancelMissionBeforeDispatch();
-        }
-
-        public bool IsCancelMissionAfterDispatch()
-        {
-            return pack.IsCancelMissionAfterDispatch();
+            return pack.IsCancelMission();
         }
 
         public Task<bool> DispatchNewMission()
@@ -47,6 +42,11 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission
         {
             return pack.NotifyMissionUpdated();
         }
+
+        public Task<bool> DispatchCancelMission()
+        {
+            return pack.DispatchCancelMission();
+        }
     }
 
     public enum ESetMission
@@ -55,8 +55,7 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission
         CheckMission,
 
         NewMission,
-        CancelMissionBeforeDispatch,
-        CancelMissionAfterDispatch
+        CancelMission
     }
 
     public partial class SwarmCoreSetMissionTask : FSMBase<ESetMission, int>
@@ -81,13 +80,9 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission
                                 {
                                     Set(ESetMission.NewMission, 0);
                                 }
-                                else if(IsCancelMissionBeforeDispatch())
+                                else if(IsCancelMission())
                                 {
-                                    Set(ESetMission.CancelMissionBeforeDispatch, 0);
-                                }
-                                else if(IsCancelMissionAfterDispatch())
-                                {
-                                    Set(ESetMission.CancelMissionAfterDispatch, 0);
+                                    Set(ESetMission.CancelMission, 0);
                                 }
                                 else
                                 {
@@ -120,6 +115,37 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission
 
                         case 10:
                             if(await UpsertMissionTable())
+                            {
+                                await NotifyMissionUpdated();
+                                Set(ESetMission.CheckMission, 0);
+
+                            }
+                            else
+                            {
+                                SaveState();
+                                Set(ES1.Error, ESetMission.None, 0);
+                            }
+                            break;
+                    }
+                    break;
+
+                case ESetMission.CancelMission:
+                    switch(S3)
+                    {
+                        case 0:
+                            if(await DispatchCancelMission())
+                            {
+                                Set(10);
+                            }
+                            else
+                            {
+                                SaveState();
+                                Set(ES1.Error, ESetMission.None, 0);
+                            }
+                            break;
+
+                        case 10:
+                            if (await UpsertMissionTable())
                             {
                                 await NotifyMissionUpdated();
                                 Set(ESetMission.CheckMission, 0);

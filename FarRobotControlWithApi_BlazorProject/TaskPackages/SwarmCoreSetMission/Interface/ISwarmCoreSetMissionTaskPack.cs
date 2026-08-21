@@ -6,12 +6,12 @@
 
         bool IsNewMission();
 
-        bool IsCancelMissionBeforeDispatch();
-
-        bool IsCancelMissionAfterDispatch();
+        bool IsCancelMission();
 
 
         Task<bool> DispatchNewMission();
+
+        Task<bool> DispatchCancelMission();
 
         Task<bool> UpsertMissionTable();
 

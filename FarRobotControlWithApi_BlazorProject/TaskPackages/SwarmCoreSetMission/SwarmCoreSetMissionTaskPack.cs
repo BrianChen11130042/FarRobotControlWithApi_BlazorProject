@@ -61,24 +61,9 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             }
         }
 
-        public bool IsCancelMissionBeforeDispatch()
+        public bool IsCancelMission()
         {
-            if (!string.IsNullOrEmpty(IDataLib.AmrMission.AmrSerialNumber) 
-                && IDataLib.AmrMission.IsStart == false 
-                && IDataLib.AmrMission.CancelRequest == true)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public bool IsCancelMissionAfterDispatch()
-        {
-            if (!string.IsNullOrEmpty(IDataLib.AmrMission.AmrSerialNumber)
-                && IDataLib.AmrMission.IsStart == true
+            if (!string.IsNullOrEmpty(IDataLib.AmrMission.AmrSerialNumber)  
                 && IDataLib.AmrMission.CancelRequest == true)
             {
                 return true;
@@ -157,6 +142,60 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
                 chargeFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.response.swarm_data.flow_id;
                 chargeFlow.StartTime = DateTime.Now;
                 return true;
+            }
+            else
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+        }
+
+        public async Task<bool> DispatchCancelMission()
+        {
+            foreach(FlowBase flow in IDataLib.AmrMission.Flows)
+            {
+                if(! await _setCancelByFlowId(flow))
+                {
+                    return false;
+                }
+            }
+
+            if (IDataLib.AmrMission.Flows.All(x => x.IsFinish || x.IsCancel))
+            {
+                DateTime? maxTime = IDataLib.AmrMission.Flows.SelectMany(x => new DateTime?[] { x.FinishTime, x.CancelTime })
+                                                             .Where(t => t.HasValue)
+                                                             .Max();
+                IDataLib.AmrMission.CancelTime = maxTime;
+            }
+
+            return true;
+        }
+
+        async Task<bool> _setCancelByFlowId(FlowBase flow)
+        {
+            if(!flow.IsStart && string.IsNullOrEmpty(flow.FlowId))
+            {
+                flow.CancelTime = DateTime.Now;
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(flow.FlowId) || flow.IsFinish || flow.IsCancel)
+                return true;
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.deleteFlow.flowId = flow.FlowId;
+
+            if(await IAmrControlOp.SetDeleteFlowByFlowId(amrControl))
+            {
+                if(IAmrControlPack.Packages[amrControl].property.farRobot.deleteFlow.response.system_status_code == 200)
+                {
+                    flow.CancelTime = DateTime.Now;
+                    return true;
+                }
+                else
+                {
+                    return true;
+                }
             }
             else
             {
