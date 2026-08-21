@@ -92,7 +92,9 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                                                                        && x.IsFinish == false
                                                                        && x.IsCancel == false
                                                                        && x.FlowCount != 0
-                                                                       && x.Flows.Count == x.FlowCount)
+                                                                       && x.Flows.Count == x.FlowCount
+                                                                       && x.StartTime.HasValue
+                                                                       && x.StartTime.Value <= DateTime.Now.AddSeconds(-3))
                                                               .OrderBy(x => x.EstablishTime)
                                                               .ToList();
 

@@ -127,9 +127,22 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
             else
             {
                 string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+
+                if(_isFlowNotFound(nlog))
+                {
+                    await IDataLib.WriteNLogError(nlog);
+                    return true;
+                }
+
                 await IDataLib.WriteNLogError(nlog);
                 return false;
             }
+        }
+
+        bool _isFlowNotFound(string errorLog)
+        {
+            return errorLog.Contains("HTTP 404", StringComparison.OrdinalIgnoreCase)
+                && errorLog.Contains("flow not found", StringComparison.OrdinalIgnoreCase);
         }
 
         public bool IsNeedGetArtifactStatus()
