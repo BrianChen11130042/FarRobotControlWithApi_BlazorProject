@@ -104,7 +104,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
         async Task<bool> _getProgressByFlowId(FlowBase flow)
         {
-            if (string.IsNullOrEmpty(flow.FlowId))
+            if (string.IsNullOrEmpty(flow.FlowId) || flow.IsFinish || flow.IsCancel)
                 return true;
 
             IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.flowId = flow.FlowId;
