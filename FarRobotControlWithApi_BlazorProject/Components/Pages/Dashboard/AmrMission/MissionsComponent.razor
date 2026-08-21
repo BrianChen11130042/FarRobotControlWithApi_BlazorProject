@@ -103,7 +103,25 @@
 
     async Task _clickCancelMission()
     {
-        AmrMissionTable missionTable = (AmrMissionTable)targetMission;
+        IToastMsg.NotifyInfo("Start Cancel Mission");
+
+        AmrMissionTable target = (AmrMissionTable)targetMission;
+
+        if (target.IsFinish || target.CancelRequest || target.IsCancel)
+        {
+            IToastMsg.NotifyError("Cancel Mission Fail");
+            return;
+        }
+
+        if (await machineService.CancelMission(target))
+        {
+            await _loadMissionList();
+            IToastMsg.NotifySuccess("Cancel Mission Success");
+        }
+        else
+        {
+            IToastMsg.NotifyError("Cancel Mission Fail");
+        }
     }
 
     async Task _handleMissionUpdated(List<AmrMissionTable> missions)

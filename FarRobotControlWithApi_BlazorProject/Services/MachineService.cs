@@ -120,5 +120,48 @@ namespace FarRobotControlWithApi_BlazorProject.Services
                 return result.status;
             }
         }
+
+        public async Task<bool> CancelMission(AmrMissionTable mission)
+        {
+
+            mission.CancelRequest = true;
+            var missionResult = await scope.missionTableLibrary.UpsertMissionTable(mission);
+
+            if (!missionResult.status)
+            {
+                await scope.observerLibrary.NotifyNLog(EStatus.Error, missionResult.msg);
+                return missionResult.status;
+            }
+
+            foreach(FlowBase flow in mission.Flows)
+            {
+                flow.CancelRequest = true;
+
+                switch(flow)
+                {
+                    case MoveFlowTable move:
+                        var moveResult = await scope.missionTableLibrary.UpsertFlow<MoveFlowTable>(move);
+
+                        if(!moveResult.status)
+                        {
+                            await scope.observerLibrary.NotifyNLog(EStatus.Error, moveResult.msg);
+                            return moveResult.status;
+                        }
+                        break;
+
+                    case ChargeFlowTable charge:
+                        var chargeResult = await scope.missionTableLibrary.UpsertFlow<ChargeFlowTable>(charge);
+
+                        if(!chargeResult.status)
+                        {
+                            await scope.observerLibrary.NotifyNLog(EStatus.Error, chargeResult.msg);
+                            return chargeResult.status;
+                        }
+                        break;
+                }
+            }
+
+            return true;
+        }
     }
 }
