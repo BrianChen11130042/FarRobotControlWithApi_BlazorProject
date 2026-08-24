@@ -42,6 +42,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                     List<AmrMissionTable> list = await context.AmrMissionTables.Include(x => x.Flows)
                                                                                .AsNoTracking()
                                                                                .Where(x => x.FinishTime == null
+                                                                                        && x.CancelTime == null
                                                                                         && x.FlowCount != 0)
                                                                                .OrderBy(x => x.EstablishTime)
                                                                                .ToListAsync();
