@@ -114,12 +114,21 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
 
         public async Task<bool> UpsertMissionTable()
         {
-            var result = await IMissionTableOp.UpsertMissionTable(TargetStartedMission);
+            bool _writeDb = TargetStartedMission.IsFinish || TargetStartedMission.IsCancel;
 
-            if (!result.status)
+            if (_writeDb)
             {
-                await WriteNLogError(result.msg);
-                return result.status;
+                var result = await IMissionTableOp.UpsertMissionTable(TargetStartedMission);
+
+                if (!result.status)
+                {
+                    await WriteNLogError(result.msg);
+                    return result.status;
+                }
+            }
+            else
+            {
+                IMissionTableOp.UpsertMissionTableInQueue(TargetStartedMission);
             }
 
             foreach (FlowBase flow in TargetStartedMission.Flows)
@@ -127,14 +136,14 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
                 switch (flow)
                 {
                     case MoveFlowTable moveflow:
-                        if (!await _upsertFlow<MoveFlowTable>(moveflow))
+                        if (!await _upsertFlow<MoveFlowTable>(moveflow, _writeDb))
                         {
                             return false;
                         }
                         break;
 
                     case ChargeFlowTable chargeflow:
-                        if (!await _upsertFlow<ChargeFlowTable>(chargeflow))
+                        if (!await _upsertFlow<ChargeFlowTable>(chargeflow, _writeDb))
                         {
                             return false;
                         }
@@ -145,18 +154,25 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
             return true;
         }
 
-        async Task<bool> _upsertFlow<T>(T flow) where T : FlowBase
+        async Task<bool> _upsertFlow<T>(T flow, bool writeDb) where T : FlowBase
         {
-            var result = await IMissionTableOp.UpsertFlow<T>(flow);
-
-            if (result.status)
+            if(writeDb)
             {
-                return result.status;
+                var result = await IMissionTableOp.UpsertFlow<T>(flow);
+
+                if (!result.status)
+                {
+                    await WriteNLogError(result.msg);
+                    return result.status;
+                }
+
+                return true;
             }
             else
             {
-                await WriteNLogError(result.msg);
-                return result.status;
+                IMissionTableOp.UpsertFlowInQueue<T>(flow);
+
+                return true;
             }
         }
 

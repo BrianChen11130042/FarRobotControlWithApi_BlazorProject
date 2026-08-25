@@ -123,7 +123,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
 
                     await context.SaveChangesAsync();
 
-                    _upsertMissionInQueue(data);
+                    UpsertMissionTableInQueue(data);
 
                     return (true, string.Empty);
                 }
@@ -134,7 +134,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
             }
         }
 
-        void _upsertMissionInQueue(AmrMissionTable data)
+        public void UpsertMissionTableInQueue(AmrMissionTable data)
         {
             var target = listAmrMissionInQueue.FirstOrDefault(x => x.Id == data.Id);
 
@@ -178,7 +178,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
 
                     await context.SaveChangesAsync();
 
-                    _upsertFlowInQueue<T>(data);
+                    UpsertFlowInQueue<T>(data);
 
                     return (true, string.Empty);
                 }
@@ -189,7 +189,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
             }
         }
 
-        void _upsertFlowInQueue<T>(T data) where T : FlowBase
+        public void UpsertFlowInQueue<T>(T data) where T : FlowBase
         {
             var amrMission = listAmrMissionInQueue.FirstOrDefault(x => x.Id == data.MissionId);
 

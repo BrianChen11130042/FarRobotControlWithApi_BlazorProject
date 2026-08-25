@@ -14,6 +14,10 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable.Interface
 
         Task<(bool status, string msg)> UpsertMissionTable(AmrMissionTable data);
 
+        void UpsertMissionTableInQueue(AmrMissionTable data);
+
         Task<(bool status, string msg)> UpsertFlow<T>(T data) where T : FlowBase;
+
+        void UpsertFlowInQueue<T>(T data) where T : FlowBase;
     }
 }
