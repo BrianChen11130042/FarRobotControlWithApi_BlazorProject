@@ -52,10 +52,10 @@
     {
         machineService.dgAmrMissionUpdate += _handleMissionUpdated;
         machineService.dgInitResult += _handleInitResult;
-        await _loadMissionList();
+        await _loadPageInform();
     }
 
-    async Task _loadMissionList()
+    async Task _loadPageInform()
     {
         listMission = await machineService.GetAmrMissionInQueue();
 
@@ -92,7 +92,7 @@
 
         if (await machineService.SetMission(mission))
         {
-            await _loadMissionList();
+            await _loadPageInform();
             IToastMsg.NotifySuccess("Add New Mission Success");
         }
         else
@@ -115,7 +115,7 @@
 
         if (await machineService.CancelMission(target))
         {
-            await _loadMissionList();
+            await _loadPageInform();
             IToastMsg.NotifySuccess("Cancel Mission Success");
         }
         else
