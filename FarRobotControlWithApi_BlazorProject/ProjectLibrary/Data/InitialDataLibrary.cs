@@ -38,6 +38,51 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
         }
     }
 
+    public partial class InitialDataLibrary
+    {
+        List<string> _listFlowName { get; set; } = new List<string>();
+
+        public List<string> ListFlowName
+        {
+            get
+            {
+                return _listFlowName;
+            }
+            set
+            {
+                _listFlowName = value;
+            }
+        }
+
+        List<string> _listAmrSerialNumber { get; set; } = new List<string>();
+
+        public List<string> ListAmrSerialNumber
+        {
+            get
+            {
+                return _listAmrSerialNumber;
+            }
+            set
+            {
+                _listAmrSerialNumber = value;
+            }
+        }
+
+        List<string> _listCellName { get; set; } = new List<string>();
+
+        public List<string> ListCellName
+        {
+            get
+            {
+                return _listCellName;
+            }
+            set
+            {
+                _listCellName = value;
+            }
+        }
+    }
+
     public partial class InitialDataLibrary : IInitialDataLibrary
     {
         public async Task<bool> InitAmrMissionInQueue()
@@ -58,6 +103,11 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
         public async Task NotifyMissionUpdated()
         {
             await IMissionObser.NotifyMissionUpdated(IMissionTableOp.listAmrMissionInQueue);
+        }
+
+        public async Task NotifyMissionParamUpdated()
+        {
+            await IMissionObser.NotifyMissionParamUpdated(ListFlowName, ListAmrSerialNumber, ListCellName);
         }
 
         public async Task NotifyIntialResult(bool success, string msg)

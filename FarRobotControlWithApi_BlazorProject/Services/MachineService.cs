@@ -91,19 +91,35 @@ namespace FarRobotControlWithApi_BlazorProject.Services
     }
 
     public delegate Task dgAmrMissionUpdated(List<AmrMissionTable> missions);
+    public delegate Task dgAmrMissionParamUpdated(List<string> flowNames, List<string> amrIds, List<string> cellNames);
 
     public partial class MachineService : IMissionObserver
     {
         public event dgAmrMissionUpdated dgAmrMissionUpdate;
+        public event dgAmrMissionParamUpdated dgAmrMissionParamUpdate;
 
         public async Task HandleMissionUpdated(List<AmrMissionTable> list)
         {
             dgAmrMissionUpdate?.Invoke(list);
         }
 
+        public async Task HandleMissionParamUpdated(List<string> flowNames, List<string> amrIds, List<string> cellNames)
+        {
+            dgAmrMissionParamUpdate?.Invoke(flowNames, amrIds, cellNames);
+        }
+
         public async Task<List<AmrMissionTable>> GetAmrMissionInQueue()
         {
             return scope.missionTableLibrary.listAmrMissionInQueue;
+        }
+
+        public async Task<(List<string> flowNames, List<string> amrIds, List<string> cellNames)> GetAmrMissionParam()
+        {
+            List<string> flows = scope.initialDataLibrary.ListFlowName;
+            List<string> amrs = scope.initialDataLibrary.ListAmrSerialNumber;
+            List<string> cells = scope.initialDataLibrary.ListCellName;
+
+            return (flows, amrs, cells);
         }
 
         public async Task<bool> SetMission(AmrMissionTable mission)

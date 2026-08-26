@@ -14,9 +14,9 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SystemControl
             interval = 1;
         }
 
-        public Task<bool> CheckSwarmCoreConnect()
+        public Task<bool> InitSwarmCore()
         {
-            return pack.CheckSwarmCoreConnect();
+            return pack.InitSwarmCore();
         }
 
         public Task<bool> InitAmrMissionInQueue()
@@ -37,6 +37,11 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SystemControl
         public Task NotifyMissionUpdated()
         {
             return pack.NotifyMissionUpdated();
+        }
+
+        public Task NotifyMissionParamUpdated()
+        {
+            return pack.NotifyMissionParamUpdated();
         }
     }
 
@@ -75,8 +80,9 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SystemControl
                             break;
 
                         case 10:
-                            if(await CheckSwarmCoreConnect())
+                            if(await InitSwarmCore())
                             {
+                                await NotifyMissionParamUpdated();
                                 await NotifyInitialSuccess();
                                 Set(ES1.Finish, EInitialTask.None, 0);
                             }

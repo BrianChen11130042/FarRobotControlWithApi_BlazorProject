@@ -72,6 +72,17 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer
                 }
             }
         }
+
+        public async Task NotifyMissionParamUpdated(List<string> flowNames, List<string> amrIds, List<string> cellNames)
+        {
+            if(osMission != null)
+            {
+                foreach (var o in osMission)
+                {
+                    await o.HandleMissionParamUpdated(flowNames, amrIds, cellNames);
+                }
+            }
+        }
     }
 
     public partial class ObserverLibrary : ISystemControlObservable

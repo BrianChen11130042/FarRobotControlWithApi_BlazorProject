@@ -44,23 +44,65 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
             }
         }
 
-        public async Task<bool> CheckSwarmCoreConnect()
+        public async Task<bool> InitSwarmCore()
         {
-            if (await IAmrControlOp.GetAccessToken(amrControl))
-            {
-                return true;
-            }
-            else
+            if (!await IAmrControlOp.GetAccessToken(amrControl))
             {
                 string nlog = IAmrControlPack.Packages[amrControl].errorLog;
                 await IDataLib.WriteNLogError(nlog);
                 return false;
             }
+            
+            if(!await IAmrControlOp.GetFlowName(amrControl))
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+
+            IDataLib.ListFlowName = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                   .flowName.response.swarm_data.SelectMany(x => x.flows)
+                                                                                .Where(x => !string.IsNullOrEmpty(x))
+                                                                                .Distinct()
+                                                                                .ToList();
+
+            if(!await IAmrControlOp.GetScanAmr(amrControl))
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+
+            IDataLib.ListAmrSerialNumber = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                          .scanAmr.response.robots.Select(x => x.robot_id)
+                                                                                  .Where(x => !string.IsNullOrEmpty(x))
+                                                                                  .Distinct()
+                                                                                  .ToList();
+
+            if(!await IAmrControlOp.GetCellStatus(amrControl))
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+
+            IDataLib.ListCellName = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                   .cellStatus.response.cells.Select(x => x.display_name)
+                                                                             .Where(x => !string.IsNullOrEmpty(x))
+                                                                             .Distinct()
+                                                                             .ToList();
+
+            return true;
         }
 
         public async Task NotifyMissionUpdated()
         {
             await IDataLib.NotifyMissionUpdated();
+        }
+
+        public async Task NotifyMissionParamUpdated()
+        {
+            await IDataLib.NotifyMissionParamUpdated();
         }
 
         public async Task NotifyInitialSuccess()

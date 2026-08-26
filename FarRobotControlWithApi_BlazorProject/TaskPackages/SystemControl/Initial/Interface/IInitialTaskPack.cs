@@ -4,9 +4,11 @@
     {
         Task<bool> InitAmrMissionInQueue();
 
-        Task<bool> CheckSwarmCoreConnect();
+        Task<bool> InitSwarmCore();
 
         Task NotifyMissionUpdated();
+
+        Task NotifyMissionParamUpdated();
 
         Task NotifyInitialSuccess();
 

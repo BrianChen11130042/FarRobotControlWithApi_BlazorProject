@@ -22,11 +22,15 @@ namespace FarRobotControlWithApi_BlazorProject.Services.Interface
         //任務
         Task<List<AmrMissionTable>> GetAmrMissionInQueue();
 
+        Task<(List<string> flowNames, List<string> amrIds, List<string> cellNames)> GetAmrMissionParam();
+
         Task<bool> SetMission(AmrMissionTable mission);
 
         Task<bool> CancelMission(AmrMissionTable mission);
 
         event dgAmrMissionUpdated dgAmrMissionUpdate;
+
+        event dgAmrMissionParamUpdated dgAmrMissionParamUpdate;
 
     }
 }

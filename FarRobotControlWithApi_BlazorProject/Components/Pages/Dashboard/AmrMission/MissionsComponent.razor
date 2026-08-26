@@ -51,6 +51,7 @@
     protected override async Task OnInitializedAsync()
     {
         machineService.dgAmrMissionUpdate += _handleMissionUpdated;
+        machineService.dgAmrMissionParamUpdate += _handleMissionParamUpdate;
         machineService.dgInitResult += _handleInitResult;
         await _loadPageInform();
     }
@@ -59,23 +60,10 @@
     {
         listMission = await machineService.GetAmrMissionInQueue();
 
-        listFlowType = new List<EFlowType>()
-        {
-            EFlowType.Move,
-            EFlowType.Charge
-        };
-
-        listAmrSerialNumber = new List<string>()
-        {
-            "smr_9901010401002t73j251"
-        };
-
-        listCellName = new List<string>()
-        {
-            "departure",
-            "destination",
-            "Charger"
-        };
+        var paramResult = await machineService.GetAmrMissionParam();
+        listFlowType = _getExistFlowType(paramResult.flowNames);
+        listAmrSerialNumber = paramResult.amrIds;
+        listCellName = paramResult.cellNames;
     }
 
     async Task _clickNewMission()
@@ -130,6 +118,36 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    async Task _handleMissionParamUpdate(List<string> flowNames, List<string> amrIds, List<string> cellNames)
+    {
+        listFlowType = _getExistFlowType(flowNames);
+        listAmrSerialNumber = amrIds;
+        listCellName = cellNames;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    List<EFlowType> _getExistFlowType(List<string> listFlowName)
+    {
+        List<EFlowType> listFlow = new List<EFlowType>();
+
+        foreach (string flowName in listFlowName)
+        {
+            switch (flowName)
+            {
+                case "move_api_test":
+                    listFlow.Add(EFlowType.Move);
+                    break;
+
+                case "charge_api_test":
+                    listFlow.Add(EFlowType.Charge);
+                    break;
+            }
+        }
+
+        return listFlow;
+    }
+
     async Task _handleInitResult(bool success, string msg)
     {
         if (success)
@@ -145,6 +163,7 @@
     public void Dispose()
     {
         machineService.dgAmrMissionUpdate -= _handleMissionUpdated;
+        machineService.dgAmrMissionParamUpdate -= _handleMissionParamUpdate;
         machineService.dgInitResult -= _handleInitResult;
     }
 }
