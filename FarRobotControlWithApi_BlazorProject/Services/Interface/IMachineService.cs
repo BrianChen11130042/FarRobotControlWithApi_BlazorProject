@@ -26,7 +26,7 @@ namespace FarRobotControlWithApi_BlazorProject.Services.Interface
 
         Task<bool> SetMission(AmrMissionTable mission);
 
-        Task<bool> CancelMission(AmrMissionTable mission);
+        Task<bool> CancelMission(Guid missionId);
 
         event dgAmrMissionUpdated dgAmrMissionUpdate;
 

@@ -137,8 +137,19 @@ namespace FarRobotControlWithApi_BlazorProject.Services
             }
         }
 
-        public async Task<bool> CancelMission(AmrMissionTable mission)
+        public async Task<bool> CancelMission(Guid missionId)
         {
+
+            AmrMissionTable? mission = scope.missionTableLibrary.listAmrMissionInQueue.FirstOrDefault(x => x.Id == missionId
+                                                                                                        && x.IsFinish == false
+                                                                                                        && x.CancelRequest == false
+                                                                                                        && x.IsCancel == false);
+
+            if(mission == null)
+            {
+                await scope.observerLibrary.NotifyNLog(EStatus.Error, "Mission not found in queue");
+                return false;
+            }
 
             mission.CancelRequest = true;
             var missionResult = await scope.missionTableLibrary.UpsertMissionTable(mission);
