@@ -4,7 +4,7 @@ using FarRobotControlWithApi_BlazorProject.EFModel;
 
 namespace FarRobotControlWithApi_BlazorProject.Services.Interface
 {
-    public interface IMachineService
+    public interface IFarRobotMachineService
     {
         //連線初始化
         Task<List<WebApiClientConfig>> GetWebApiClientConfig();

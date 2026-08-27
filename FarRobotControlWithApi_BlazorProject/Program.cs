@@ -64,7 +64,7 @@ builder.Services.AddSingleton<ObserverLibrary>();
 
 builder.Services.AddSingleton<MachineScope>();
 
-builder.Services.AddSingleton<IMachineService, MachineService>();
+builder.Services.AddSingleton<IFarRobotMachineService, FarRobotMachineService>();
 
 
 var app = builder.Build();

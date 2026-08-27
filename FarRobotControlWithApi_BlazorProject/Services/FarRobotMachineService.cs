@@ -9,11 +9,11 @@ using FarRobotControlWithApi_BlazorProject.Services.Interface;
 
 namespace FarRobotControlWithApi_BlazorProject.Services
 {
-    public partial class MachineService : IMachineService
+    public partial class FarRobotMachineService : IFarRobotMachineService
     {
         public MachineScope scope;
 
-        public MachineService(MachineScope scope)
+        public FarRobotMachineService(MachineScope scope)
         {
             this.scope = scope;
 
@@ -24,7 +24,7 @@ namespace FarRobotControlWithApi_BlazorProject.Services
 
     public delegate Task dgInitResult(bool success, string msg);
 
-    public partial class MachineService : ISystemControlObserver
+    public partial class FarRobotMachineService : ISystemControlObserver
     {
         public async Task<List<WebApiClientConfig>> GetWebApiClientConfig()
         {
@@ -93,7 +93,7 @@ namespace FarRobotControlWithApi_BlazorProject.Services
     public delegate Task dgAmrMissionUpdated(List<AmrMissionTable> missions);
     public delegate Task dgAmrMissionParamUpdated(List<string> flowNames, List<string> amrIds, List<string> cellNames);
 
-    public partial class MachineService : IMissionObserver
+    public partial class FarRobotMachineService : IMissionObserver
     {
         public event dgAmrMissionUpdated dgAmrMissionUpdate;
         public event dgAmrMissionParamUpdated dgAmrMissionParamUpdate;
