@@ -2,13 +2,13 @@
 {
     public interface ISwarmCoreMonitorMissionTaskPack
     {
-        Task<bool> GetStartedMissionList();
+        Task<bool> GetRunningMissionList();
 
-        bool IsGetStartedMissionList();
+        bool IsGetRunningMissionList();
 
-        bool IsNextStartedMissionTarget();
+        bool IsNextRunningMissionTarget();
 
-        Task<bool> GetStartedMissionTarget();
+        Task<bool> GetRunningMissionTarget();
 
         Task<bool> GetProgressByFlowId();
 

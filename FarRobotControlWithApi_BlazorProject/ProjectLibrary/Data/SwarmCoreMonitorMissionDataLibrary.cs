@@ -39,17 +39,17 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
 
     public partial class SwarmCoreMonitorMissionDataLibrary
     {
-        List<AmrMissionTable> _listStartedMission { get; set; } = new List<AmrMissionTable>();
+        List<AmrMissionTable> _listRunningMission { get; set; } = new List<AmrMissionTable>();
 
-        public List<AmrMissionTable> ListStartedMission
+        public List<AmrMissionTable> ListRunningMission
         {
             get
             {
-                return _listStartedMission;
+                return _listRunningMission;
             }
             set
             {
-                _listStartedMission = value;
+                _listRunningMission = value;
             }
         }
 
@@ -67,45 +67,45 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
             }
         }
 
-        AmrMissionTable _targetStartedMission { get; set; } = new AmrMissionTable();
+        AmrMissionTable _targetRunningMission { get; set; } = new AmrMissionTable();
 
-        public AmrMissionTable TargetStartedMission
+        public AmrMissionTable TargetRunningMission
         {
             get
             {
-                return _targetStartedMission;
+                return _targetRunningMission;
             }
             set
             {
-                _targetStartedMission = value;
+                _targetRunningMission = value;
             }
         }
     }
 
     public partial class SwarmCoreMonitorMissionDataLibrary : ISwarmCoreMonitorMissionDataLibrary
     {
-        public async Task<bool> GetStartedMissionTableList()
+        public async Task<bool> GetRunningMissionTableList()
         {
-            List<AmrMissionTable> listTable = await IMissionTableOp.GetStartedMissionTableList();
+            List<AmrMissionTable> listTable = await IMissionTableOp.GetRunningMissionTableList();
 
             if(listTable.Count != 0)
             {
-                ListStartedMission.Clear();
-                ListStartedMission = listTable;
+                ListRunningMission.Clear();
+                ListRunningMission = listTable;
                 StartedIndex = 0;
             }
             else
             {
-                ListStartedMission.Clear();
+                ListRunningMission.Clear();
                 StartedIndex = 0;
             }
 
             return true;
         }
 
-        public async Task<bool> GetStartedMissionTableTarget()
+        public async Task<bool> GetRunningMissionTableTarget()
         {
-            TargetStartedMission = ListStartedMission[StartedIndex];
+            TargetRunningMission = ListRunningMission[StartedIndex];
 
             StartedIndex = StartedIndex + 1;
 
@@ -114,11 +114,11 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
 
         public async Task<bool> UpsertMissionTable()
         {
-            bool _writeDb = TargetStartedMission.IsFinish || TargetStartedMission.IsCancel;
+            bool _writeDb = TargetRunningMission.IsFinish || TargetRunningMission.IsCancel || TargetRunningMission.IsError;
 
             if (_writeDb)
             {
-                var result = await IMissionTableOp.UpsertMissionTable(TargetStartedMission);
+                var result = await IMissionTableOp.UpsertMissionTable(TargetRunningMission);
 
                 if (!result.status)
                 {
@@ -128,10 +128,10 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
             }
             else
             {
-                IMissionTableOp.UpsertMissionTableInQueue(TargetStartedMission);
+                IMissionTableOp.UpsertMissionTableInQueue(TargetRunningMission);
             }
 
-            foreach (FlowBase flow in TargetStartedMission.Flows)
+            foreach (FlowBase flow in TargetRunningMission.Flows)
             {
                 switch (flow)
                 {

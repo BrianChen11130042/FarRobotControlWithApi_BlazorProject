@@ -16,6 +16,9 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
         [MaxLength(500)]
         public string? FlowId { get; set; }
 
+        [MaxLength(500)]
+        public string? TaskId { get; set; }
+
         public int Priority { get; set; }
 
         public int State { get; set; }
@@ -35,7 +38,7 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
         [NotMapped]
         public bool IsError => string.Equals(StateString, "FAILED", StringComparison.OrdinalIgnoreCase);
 
-        public int StatusCode { get; set; }
+        public string? StatusCode { get; set; }
 
         public string? StatusMessage { get; set; }
 
@@ -43,8 +46,6 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
         public bool IsFinish => FinishTime is not null;
 
         public DateTime? FinishTime { get; set; }
-
-        public bool CancelRequest { get; set; }
 
         [NotMapped]
         public bool IsCancel => CancelTime is not null;

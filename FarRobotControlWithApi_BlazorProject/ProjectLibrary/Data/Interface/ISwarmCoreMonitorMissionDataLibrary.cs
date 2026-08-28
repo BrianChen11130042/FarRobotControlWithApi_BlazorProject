@@ -4,15 +4,15 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface
 {
     public interface ISwarmCoreMonitorMissionDataLibrary
     {
-        List<AmrMissionTable> ListStartedMission { get; set; }
+        List<AmrMissionTable> ListRunningMission { get; set; }
 
-        AmrMissionTable TargetStartedMission { get; set; }
+        AmrMissionTable TargetRunningMission { get; set; }
 
         int StartedIndex { get; set; }
 
-        Task<bool> GetStartedMissionTableList();
+        Task<bool> GetRunningMissionTableList();
 
-        Task<bool> GetStartedMissionTableTarget();
+        Task<bool> GetRunningMissionTableTarget();
 
         Task<bool> UpsertMissionTable();
 

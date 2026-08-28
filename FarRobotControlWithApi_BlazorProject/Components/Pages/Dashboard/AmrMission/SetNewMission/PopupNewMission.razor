@@ -190,6 +190,7 @@
         missionTable.Id = Guid.NewGuid();
         missionTable.FlowCount = listFlow.Count;
         missionTable.EstablishTime = now;
+        missionTable.MissionState = EMissionState.DISPATCH_REQUEST.ToString();
 
         for (int i = 0; i < listFlow.Count; i++)
         {

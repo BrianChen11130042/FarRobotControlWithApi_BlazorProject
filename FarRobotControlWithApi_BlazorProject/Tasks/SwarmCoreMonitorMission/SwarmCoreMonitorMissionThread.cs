@@ -24,7 +24,7 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
     {
         public async override Task Init()
         {
-            monitorMissionTask.Set(ES1.Action, EMonitorMission.CheckStartedMission, 0);
+            monitorMissionTask.Set(ES1.Action, EMonitorMission.CheckRunningMission, 0);
 
             Set(ES1.Action, EMonitorMissionThread.MonitorMission, 0);
         }

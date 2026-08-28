@@ -8,10 +8,13 @@
 
         bool IsCancelMission();
 
+        bool IsRetryMission();
 
         Task<bool> DispatchNewMission();
 
         Task<bool> DispatchCancelMission();
+
+        Task<bool> DispatchRetryMission();
 
         Task<bool> UpsertMissionTable();
 

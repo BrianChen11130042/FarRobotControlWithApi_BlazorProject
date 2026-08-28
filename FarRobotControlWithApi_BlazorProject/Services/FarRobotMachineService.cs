@@ -142,8 +142,10 @@ namespace FarRobotControlWithApi_BlazorProject.Services
 
             AmrMissionTable? mission = scope.missionTableLibrary.listAmrMissionInQueue.FirstOrDefault(x => x.Id == missionId
                                                                                                         && x.IsFinish == false
-                                                                                                        && x.CancelRequest == false
-                                                                                                        && x.IsCancel == false);
+                                                                                                        && x.IsCancel == false
+                                                                                                        && !string.Equals(x.MissionState,
+                                                                                                                          EMissionState.CANCEL_REQUEST.ToString(),
+                                                                                                                          StringComparison.OrdinalIgnoreCase));
 
             if(mission == null)
             {
@@ -151,41 +153,13 @@ namespace FarRobotControlWithApi_BlazorProject.Services
                 return false;
             }
 
-            mission.CancelRequest = true;
+            mission.MissionState = EMissionState.CANCEL_REQUEST.ToString();
             var missionResult = await scope.missionTableLibrary.UpsertMissionTable(mission);
 
             if (!missionResult.status)
             {
                 await scope.observerLibrary.NotifyNLog(EStatus.Error, missionResult.msg);
                 return missionResult.status;
-            }
-
-            foreach(FlowBase flow in mission.Flows)
-            {
-                flow.CancelRequest = true;
-
-                switch(flow)
-                {
-                    case MoveFlowTable move:
-                        var moveResult = await scope.missionTableLibrary.UpsertFlow<MoveFlowTable>(move);
-
-                        if(!moveResult.status)
-                        {
-                            await scope.observerLibrary.NotifyNLog(EStatus.Error, moveResult.msg);
-                            return moveResult.status;
-                        }
-                        break;
-
-                    case ChargeFlowTable charge:
-                        var chargeResult = await scope.missionTableLibrary.UpsertFlow<ChargeFlowTable>(charge);
-
-                        if(!chargeResult.status)
-                        {
-                            await scope.observerLibrary.NotifyNLog(EStatus.Error, chargeResult.msg);
-                            return chargeResult.status;
-                        }
-                        break;
-                }
             }
 
             return true;

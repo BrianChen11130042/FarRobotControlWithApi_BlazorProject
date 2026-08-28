@@ -36,9 +36,9 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
     public partial class SwarmCoreMonitorMissionTaskPack<EAmrControl> : ISwarmCoreMonitorMissionTaskPack
     {
-        public async Task<bool> GetStartedMissionList()
+        public async Task<bool> GetRunningMissionList()
         {
-            if(await IDataLib.GetStartedMissionTableList())
+            if(await IDataLib.GetRunningMissionTableList())
             {
                 return true;
             }
@@ -48,9 +48,9 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
             }
         }
 
-        public bool IsGetStartedMissionList()
+        public bool IsGetRunningMissionList()
         {
-            if(IDataLib.ListStartedMission.Count != 0)
+            if(IDataLib.ListRunningMission.Count != 0)
             {
                 return true;
             }
@@ -60,9 +60,9 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
             }
         }
 
-        public bool IsNextStartedMissionTarget()
+        public bool IsNextRunningMissionTarget()
         {
-            if(IDataLib.StartedIndex < IDataLib.ListStartedMission.Count)
+            if(IDataLib.StartedIndex < IDataLib.ListRunningMission.Count)
             {
                 return true;
             }
@@ -72,9 +72,9 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
             }
         }
 
-        public async Task<bool> GetStartedMissionTarget()
+        public async Task<bool> GetRunningMissionTarget()
         {
-            if (await IDataLib.GetStartedMissionTableTarget())
+            if (await IDataLib.GetRunningMissionTableTarget())
             {
                 return true;
             }
@@ -86,7 +86,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
         public async Task<bool> GetProgressByFlowId()
         {
-            foreach(FlowBase flow in IDataLib.TargetStartedMission.Flows)
+            foreach(FlowBase flow in IDataLib.TargetRunningMission.Flows)
             {
                 if(!await _getProgressByFlowId(flow))
                 {
@@ -94,9 +94,16 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 }
             }
 
-            if(IDataLib.TargetStartedMission.Flows.All(x => x.IsFinish))
+            var activeFlows = IDataLib.TargetRunningMission.Flows.Where(x => !x.IsCancel).ToList();
+
+            if (activeFlows.Count > 0 && activeFlows.All(x => x.IsFinish))
             {
-                IDataLib.TargetStartedMission.FinishTime = IDataLib.TargetStartedMission.Flows.Max(x => x.FinishTime);
+                IDataLib.TargetRunningMission.FinishTime = activeFlows.Max(x => x.FinishTime);
+                IDataLib.TargetRunningMission.MissionState = EMissionState.COMPLETED.ToString();
+            }
+            else if(activeFlows.Any(x => x.IsError)&& activeFlows.All(x => x.IsFinish || x.IsError))
+            {
+                IDataLib.TargetRunningMission.MissionState = EMissionState.FAILED.ToString();
             }
 
             return true;
@@ -104,7 +111,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
         async Task<bool> _getProgressByFlowId(FlowBase flow)
         {
-            if (string.IsNullOrEmpty(flow.FlowId) || flow.IsFinish || flow.IsCancel)
+            if (string.IsNullOrEmpty(flow.FlowId) || flow.IsFinish || flow.IsCancel || flow.IsError)
                 return true;
 
             IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.flowId = flow.FlowId;
@@ -114,11 +121,16 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 flow.State = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.state;
                 flow.StateString = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.state_string;
                 flow.CompletePercent = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.complete_percent;
-                
-                string updateTime = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.updated_timestring;
+                flow.TaskId = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.task_ids.FirstOrDefault();
+
+                if(!await _getProgressByTaskId(flow))
+                {
+                    return false;
+                }
 
                 if (string.Equals(flow.StateString, "COMPLETED", StringComparison.OrdinalIgnoreCase))
                 {
+                    string updateTime = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.updated_timestring;
                     flow.FinishTime = DateTimeOffset.Parse(updateTime).DateTime;
                 }
 
@@ -145,9 +157,31 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 && errorLog.Contains("flow not found", StringComparison.OrdinalIgnoreCase);
         }
 
+        async Task<bool> _getProgressByTaskId(FlowBase flow)
+        {
+            if (string.IsNullOrEmpty(flow.TaskId))
+                return true;
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.taskProgress.taskId = flow.TaskId;
+
+            if(await IAmrControlOp.GetProgressByTaskId(amrControl))
+            {
+                flow.StatusCode = IAmrControlPack.Packages[amrControl].property.farRobot.taskProgress.response.data.status_code;
+                flow.StatusMessage = IAmrControlPack.Packages[amrControl].property.farRobot.taskProgress.response.data.status_msg;
+
+                return true;
+            }
+            else
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+        }
+
         public bool IsNeedGetArtifactStatus()
         {
-            foreach(FlowBase flow in IDataLib.TargetStartedMission.Flows)
+            foreach(FlowBase flow in IDataLib.TargetRunningMission.Flows)
             {
                 switch(flow)
                 {
@@ -161,7 +195,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
         public async Task<bool> GetArtifactStatusByArtifactId()
         {
-            foreach(FlowBase flow in IDataLib.TargetStartedMission.Flows)
+            foreach(FlowBase flow in IDataLib.TargetRunningMission.Flows)
             {
                 switch(flow)
                 {

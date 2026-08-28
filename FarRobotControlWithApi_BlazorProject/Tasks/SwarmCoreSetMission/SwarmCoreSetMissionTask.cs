@@ -28,6 +28,11 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission
             return pack.IsCancelMission();
         }
 
+        public bool IsRetryMission()
+        {
+            return pack.IsRetryMission();
+        }
+
         public Task<bool> DispatchNewMission()
         {
             return pack.DispatchNewMission();
@@ -47,6 +52,11 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission
         {
             return pack.DispatchCancelMission();
         }
+
+        public Task<bool> DispatchRetryMission()
+        {
+            return pack.DispatchRetryMission();
+        }
     }
 
     public enum ESetMission
@@ -55,7 +65,8 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission
         CheckMission,
 
         NewMission,
-        CancelMission
+        CancelMission,
+        RetryMission
     }
 
     public partial class SwarmCoreSetMissionTask : FSMBase<ESetMission, int>
@@ -83,6 +94,10 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission
                                 else if(IsCancelMission())
                                 {
                                     Set(ESetMission.CancelMission, 0);
+                                }
+                                else if(IsRetryMission())
+                                {
+                                    Set(ESetMission.RetryMission, 0);
                                 }
                                 else
                                 {
@@ -150,6 +165,36 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreSetMission
                                 await NotifyMissionUpdated();
                                 Set(ESetMission.CheckMission, 0);
 
+                            }
+                            else
+                            {
+                                SaveState();
+                                Set(ES1.Error, ESetMission.None, 0);
+                            }
+                            break;
+                    }
+                    break;
+
+                case ESetMission.RetryMission:
+                    switch(S3)
+                    {
+                        case 0:
+                            if(await DispatchRetryMission())
+                            {
+                                Set(10);
+                            }
+                            else
+                            {
+                                SaveState();
+                                Set(ES1.Error, ESetMission.None, 0);
+                            }
+                            break;
+
+                        case 10:
+                            if(await UpsertMissionTable())
+                            {
+                                await NotifyMissionUpdated();
+                                Set(ESetMission.CheckMission, 0);
                             }
                             else
                             {

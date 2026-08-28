@@ -62,8 +62,10 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
 
         public async Task<AmrMissionTable> GetNextMissionTable()
         {
-            AmrMissionTable cancelMission = listAmrMissionInQueue.Where(x => x.IsFinish == false
-                                                                          && x.CancelRequest == true
+            AmrMissionTable? cancelMission = listAmrMissionInQueue.Where(x => string.Equals(x.MissionState, 
+                                                                                            EMissionState.CANCEL_REQUEST.ToString(), 
+                                                                                            StringComparison.OrdinalIgnoreCase)
+                                                                          && x.IsFinish == false
                                                                           && x.IsCancel == false
                                                                           && x.FlowCount != 0
                                                                           && x.Flows.Count == x.FlowCount)
@@ -75,9 +77,34 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                 return cancelMission;
             }
 
-            AmrMissionTable newMission = listAmrMissionInQueue.Where(x => x.IsStart == false
+            AmrMissionTable? retryMission = listAmrMissionInQueue.Where(x => string.Equals(x.MissionState,
+                                                                                            EMissionState.RETRY_REQUEST.ToString(),
+                                                                                            StringComparison.OrdinalIgnoreCase)
+                                                                           && x.IsStart == true
+                                                                           && x.IsFinish == false
+                                                                           && x.IsCancel == false
+                                                                           && x.IsError == false
+                                                                           && x.FlowCount != 0
+                                                                           && x.Flows.Count == x.FlowCount
+                                                                           && x.Flows.Any(f => f.IsStart && f.IsError && !f.IsFinish && !f.IsCancel)
+                                                                           && x.Flows.Any(f => !f.IsStart && !f.IsFinish && !f.IsCancel && !f.IsError))
+                                                                 .OrderBy(x => x.EstablishTime)
+                                                                 .FirstOrDefault();
+
+            if(retryMission != null)
+            {
+                return retryMission;
+            }
+
+
+
+
+            AmrMissionTable? newMission = listAmrMissionInQueue.Where(x => string.Equals(x.MissionState,
+                                                                                            EMissionState.DISPATCH_REQUEST.ToString(),
+                                                                                            StringComparison.OrdinalIgnoreCase)
+                                                                       && x.IsStart == false
+                                                                       && x.IsError == false
                                                                        && x.IsFinish == false
-                                                                       && x.CancelRequest == false
                                                                        && x.IsCancel == false
                                                                        && x.FlowCount != 0
                                                                        && x.Flows.Count == x.FlowCount)
@@ -87,11 +114,14 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
             return newMission;
         }
 
-        public async Task<List<AmrMissionTable>> GetStartedMissionTableList()
+        public async Task<List<AmrMissionTable>> GetRunningMissionTableList()
         {
             List<AmrMissionTable> list = listAmrMissionInQueue.Where(x => x.IsStart == true
                                                                        && x.IsFinish == false
                                                                        && x.IsCancel == false
+                                                                       && string.Equals(x.MissionState, 
+                                                                                        EMissionState.RUNNING.ToString(),
+                                                                                        StringComparison.OrdinalIgnoreCase)
                                                                        && x.FlowCount != 0
                                                                        && x.Flows.Count == x.FlowCount
                                                                        && x.StartTime.HasValue
@@ -146,7 +176,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                 target.EstablishTime = data.EstablishTime;
                 target.StartTime = data.StartTime;
                 target.FinishTime = data.FinishTime;
-                target.CancelRequest = data.CancelRequest;
+                target.MissionState = data.MissionState;
                 target.CancelTime = data.CancelTime;
             }
             else
@@ -201,6 +231,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                 target.MissionId = data.MissionId;
                 target.AmrSerialNumber = data.AmrSerialNumber;
                 target.FlowId = data.FlowId;
+                target.TaskId = data.TaskId;
                 target.Priority = data.Priority;
                 target.State = data.State;
                 target.StateString = data.StateString;
@@ -210,7 +241,6 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                 target.StatusCode = data.StatusCode;
                 target.StatusMessage = data.StatusMessage;
                 target.FinishTime = data.FinishTime;
-                target.CancelRequest = data.CancelRequest;
                 target.CancelTime = data.CancelTime;
 
                 //switch(data)

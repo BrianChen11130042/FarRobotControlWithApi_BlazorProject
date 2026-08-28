@@ -27,14 +27,12 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
         public string? MissionState { get; set; }
 
         [NotMapped]
-        public bool IsError => string.Equals(MissionState, "FAILED", StringComparison.OrdinalIgnoreCase);
+        public bool IsError => string.Equals(MissionState, EMissionState.FAILED.ToString(), StringComparison.OrdinalIgnoreCase);
 
         [NotMapped]
         public bool IsFinish => FinishTime is not null;
 
         public DateTime? FinishTime { get; set; }
-
-        public bool CancelRequest { get; set; }
 
         [NotMapped]
         public bool IsCancel => CancelTime is not null;

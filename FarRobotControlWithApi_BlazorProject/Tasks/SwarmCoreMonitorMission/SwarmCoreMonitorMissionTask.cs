@@ -14,24 +14,24 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
             interval = 1;
         }
 
-        public Task<bool> GetStartedMissionList()
+        public Task<bool> GetRunningMissionList()
         {
-            return pack.GetStartedMissionList();
+            return pack.GetRunningMissionList();
         }
 
-        public bool IsGetStartedMissionList()
+        public bool IsGetRunningMissionList()
         {
-            return pack.IsGetStartedMissionList();
+            return pack.IsGetRunningMissionList();
         }
 
-        public bool IsNextStartedMissionTarget()
+        public bool IsNextRunningMissionTarget()
         {
-            return pack.IsNextStartedMissionTarget();
+            return pack.IsNextRunningMissionTarget();
         }
 
-        public Task<bool> GetStartedMissionTarget()
+        public Task<bool> GetRunningMissionTarget()
         {
-            return pack.GetStartedMissionTarget();
+            return pack.GetRunningMissionTarget();
         }
 
         public Task<bool> GetProgressByFlowId()
@@ -63,7 +63,7 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
     public enum EMonitorMission
     {
         None,
-        CheckStartedMission,
+        CheckRunningMission,
 
         GetFlowProgress,
         GetArtifactStatus,
@@ -82,13 +82,13 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
                     Set(ES1.Finish, EMonitorMission.None, 0);
                     break;
 
-                case EMonitorMission.CheckStartedMission:
+                case EMonitorMission.CheckRunningMission:
                     switch(S3)
                     {
                         case 0:
-                            if(await GetStartedMissionList())
+                            if(await GetRunningMissionList())
                             {
-                                if(IsGetStartedMissionList())
+                                if(IsGetRunningMissionList())
                                 {
                                     Set(10);
                                 }
@@ -105,9 +105,9 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
                             break;
 
                         case 10:
-                            if(IsNextStartedMissionTarget())
+                            if(IsNextRunningMissionTarget())
                             {
-                                if(await GetStartedMissionTarget())
+                                if(await GetRunningMissionTarget())
                                 {
                                     Set(EMonitorMission.GetFlowProgress, 0);
                                 }
@@ -174,7 +174,7 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
                             {
                                 await NotifyMissionUpdated();
 
-                                Set(EMonitorMission.CheckStartedMission, 10);
+                                Set(EMonitorMission.CheckRunningMission, 10);
                             }
                             else
                             {
