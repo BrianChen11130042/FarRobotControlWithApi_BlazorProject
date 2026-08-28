@@ -38,8 +38,10 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
         [NotMapped]
         public bool IsError => string.Equals(StateString, "FAILED", StringComparison.OrdinalIgnoreCase);
 
+        [MaxLength(500)]
         public string? StatusCode { get; set; }
 
+        [MaxLength(500)]
         public string? StatusMessage { get; set; }
 
         [NotMapped]
