@@ -1,7 +1,5 @@
 ﻿using CommonLibraryB.Library.AmrControl.Adapter;
 using CommonLibraryB.Library.AmrControl.Package;
-using DevExpress.DocumentServices.ServiceModel.DataContracts;
-using DevExpress.Utils.Design;
 using FarRobotControlWithApi_BlazorProject.EFModel;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface;
 using FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission.Interface;
