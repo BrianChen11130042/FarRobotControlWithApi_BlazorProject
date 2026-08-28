@@ -27,6 +27,7 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
 
                 entity.HasIndex(e => e.AmrSerialNumber);
                 entity.Property(e => e.AmrSerialNumber).HasMaxLength(500);
+                entity.Property(e => e.MissionState).HasMaxLength(500);
             });
 
             modelBuilder.Entity<FlowBase>(entity => 

@@ -145,8 +145,6 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                 target.FlowCount = data.FlowCount;
                 target.EstablishTime = data.EstablishTime;
                 target.StartTime = data.StartTime;
-                target.ErrorCode = data.ErrorCode;
-                target.ErrorMessage = data.ErrorMessage;
                 target.FinishTime = data.FinishTime;
                 target.CancelRequest = data.CancelRequest;
                 target.CancelTime = data.CancelTime;
@@ -209,8 +207,8 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                 target.CompletePercent = data.CompletePercent;
                 target.EstablishTime = data.EstablishTime;
                 target.StartTime = data.StartTime;
-                target.ErrorCode = data.ErrorCode;
-                target.ErrorMessage = data.ErrorMessage;
+                target.StatusCode = data.StatusCode;
+                target.StatusMessage = data.StatusMessage;
                 target.FinishTime = data.FinishTime;
                 target.CancelRequest = data.CancelRequest;
                 target.CancelTime = data.CancelTime;

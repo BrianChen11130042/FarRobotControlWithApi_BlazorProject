@@ -23,12 +23,11 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
 
         public DateTime? StartTime { get; set; }
 
+        [MaxLength(500)]
+        public string? MissionState { get; set; }
+
         [NotMapped]
-        public bool IsError => ErrorCode is not 0 || !string.IsNullOrEmpty(ErrorMessage);
-
-        public int ErrorCode { get; set; }
-
-        public string? ErrorMessage { get; set; }
+        public bool IsError => string.Equals(MissionState, "FAILED", StringComparison.OrdinalIgnoreCase);
 
         [NotMapped]
         public bool IsFinish => FinishTime is not null;
