@@ -83,7 +83,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                                                                            && x.IsStart == true
                                                                            && x.IsFinish == false
                                                                            && x.IsCancel == false
-                                                                           && x.IsError == false
+                                                                           && x.IsError == true
                                                                            && x.FlowCount != 0
                                                                            && x.Flows.Count == x.FlowCount
                                                                            && x.Flows.Any(f => f.IsStart && f.IsError && !f.IsFinish && !f.IsCancel)
