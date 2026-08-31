@@ -4,26 +4,26 @@
 
 <DxGrid Data="@Flows" PageSize="20" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
     <Columns>
-        <DxGridDataColumn Caption="FlowType">
+        <DxGridDataColumn Caption="FlowType" Width="150px">
             <CellDisplayTemplate Context="TypeContext">
                 @_getFlowType(TypeContext.DataItem)
             </CellDisplayTemplate>
         </DxGridDataColumn>
 
-        <DxGridDataColumn Caption="Detail" Width="150px">
+        <DxGridDataColumn Caption="Detail" MinWidth="250">
             <CellDisplayTemplate Context="DetailContext">
                 <PrintFlowHost Flow="@(DetailContext.DataItem as FlowBase)" />
             </CellDisplayTemplate>
         </DxGridDataColumn>
 
-        <DxGridDataColumn FieldName="@nameof(FlowBase.EstablishTime)" DisplayFormat="g" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.StartTime)" DisplayFormat="g" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.StateString)" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.CompletePercent)" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.StatusCode)" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.StatusMessage)" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.FinishTime)" DisplayFormat="g" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.CancelTime)" DisplayFormat="g" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.EstablishTime)" DisplayFormat="g" Width="200px" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.StartTime)" DisplayFormat="g" Width="200px" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.StateString)" Width="150px" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.CompletePercent)" Width="100px" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.StatusCode)" Width="100px" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.StatusMessage)" MinWidth="250" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.FinishTime)" DisplayFormat="g" Width="200px" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.CancelTime)" DisplayFormat="g" Width="200px" />
     </Columns>
 </DxGrid>
 
