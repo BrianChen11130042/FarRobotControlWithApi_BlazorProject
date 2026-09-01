@@ -27,20 +27,7 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
         public string? MissionState { get; set; }
 
         [NotMapped]
-        public bool IsError
-        {
-            get
-            {
-                
-                if (Flows.Any(f => f.IsError && !f.IsCancel))
-                    return true;
-                
-                if (IsCancel && Flows.Any(f => f.IsError))
-                    return true;
-
-                return false;
-            }
-        }
+        public bool IsError => Flows.Any(f => f.IsError);
 
         [NotMapped]
         public bool IsFinish => FinishTime is not null;

@@ -114,7 +114,9 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
 
         public async Task<bool> UpsertMissionTable()
         {
-            bool _writeDb = TargetRunningMission.IsFinish || TargetRunningMission.IsCancel || TargetRunningMission.IsError;
+            bool _writeDb = string.Equals(TargetRunningMission.MissionState, EMissionState.COMPLETED.ToString(), StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(TargetRunningMission.MissionState, EMissionState.CANCELED.ToString(), StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(TargetRunningMission.MissionState, EMissionState.FAILED.ToString(), StringComparison.OrdinalIgnoreCase);
 
             if (_writeDb)
             {
