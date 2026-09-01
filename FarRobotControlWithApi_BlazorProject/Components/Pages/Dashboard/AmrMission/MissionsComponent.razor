@@ -13,6 +13,7 @@
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
             <DxToolbarItem IconCssClass="oi oi-plus" Click="_clickNewMission" />
             <DxToolbarItem IconCssClass="oi oi-media-stop" Enabled="@missionSelected" Click="_clickCancelMission" RenderStyle="ButtonRenderStyle.Danger"/>
+            <DxToolbarItem IconCssClass="oi oi-reload" Enabled="@missionSelected" Click="_clickRetryMission" RenderStyle="ButtonRenderStyle.Warning" />
         </DxToolbar>
     </ToolbarTemplate>
 
@@ -108,6 +109,29 @@
         else
         {
             IToastMsg.NotifyError("Cancel Mission Fail");
+        }
+    }
+
+    async Task _clickRetryMission()
+    {
+        AmrMissionTable? target = targetMission as AmrMissionTable;
+
+        if (target == null)
+        {
+            IToastMsg.NotifyError("Retry Mission Fail");
+            return;
+        }
+
+        IToastMsg.NotifyInfo("Start Retry Mission");
+
+        if (await machineService.RetryMission(target.Id))
+        {
+            await _loadPageInform();
+            IToastMsg.NotifySuccess("Retry Mission Success");
+        }
+        else
+        {
+            IToastMsg.NotifyError("Retry Mission Fail");
         }
     }
 

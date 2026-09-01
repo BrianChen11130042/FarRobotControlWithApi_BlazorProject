@@ -164,5 +164,123 @@ namespace FarRobotControlWithApi_BlazorProject.Services
 
             return true;
         }
+
+        public async Task<bool> RetryMission(Guid missionId)
+        {
+            AmrMissionTable? mission = scope.missionTableLibrary.listAmrMissionInQueue.FirstOrDefault(x => x.Id == missionId
+                                                                                                        && x.IsFinish == false
+                                                                                                        && x.IsCancel == false
+                                                                                                        && x.Flows.Any(f => f.IsError && !f.IsFinish && !f.IsCancel)
+                                                                                                        && string.Equals(x.MissionState,
+                                                                                                                         EMissionState.FAILED.ToString(),
+                                                                                                                         StringComparison.OrdinalIgnoreCase));
+
+            if (mission == null)
+            {
+                await scope.observerLibrary.NotifyNLog(EStatus.Error, "Mission not found in queue");
+                return false;
+            }
+
+            List<FlowBase> listFailFlow = mission.Flows.Where(f => f.IsError && !f.IsFinish && !f.IsCancel)
+                                                       .OrderBy(f => f.EstablishTime)
+                                                       .ToList();
+
+            List<FlowBase> listRetryFlow = _getListRetryFlow(listFailFlow);
+
+            if(!await _setListRetryFlow(listRetryFlow))
+            {
+                return false;
+            }
+
+            mission.FlowCount = mission.FlowCount + listRetryFlow.Count;
+            mission.MissionState = EMissionState.RETRY_REQUEST.ToString();
+
+            if(!await SetMission(mission))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        List<FlowBase> _getListRetryFlow(List<FlowBase> listFailFlow)
+        {
+            DateTime now = DateTime.Now;
+            List<FlowBase> listRetryFlow = new List<FlowBase>();
+
+            foreach(FlowBase failFlow in listFailFlow)
+            {
+                now = now.AddMilliseconds(1);
+
+                switch (failFlow)
+                {
+                    case MoveFlowTable move:
+
+                        listRetryFlow.Add(new MoveFlowTable()
+                        {
+                            Id = Guid.NewGuid(),
+                            MissionId = move.MissionId,
+                            AmrSerialNumber = move.AmrSerialNumber,
+                            Priority = 5,
+                            EstablishTime = now,
+                            CellName = move.CellName
+                        });
+
+                        break;
+
+                    case ChargeFlowTable charge:
+
+                        listRetryFlow.Add(new ChargeFlowTable()
+                        {
+                            Id = Guid.NewGuid(),
+                            MissionId = charge.MissionId,
+                            AmrSerialNumber = charge.AmrSerialNumber,
+                            Priority = 5,
+                            EstablishTime = now,
+                            CellName = charge.CellName,
+                            Percentage = charge.Percentage
+                        });
+
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            return listRetryFlow;
+        }
+
+        async Task<bool> _setListRetryFlow(IEnumerable<FlowBase> listRetryFlow)
+        {
+            foreach (FlowBase flow in listRetryFlow)
+            {
+                switch (flow)
+                {
+                    case MoveFlowTable move:
+
+                        var moveResult = await scope.missionTableLibrary.UpsertFlow(move);
+
+                        if (!moveResult.status)
+                        {
+                            await scope.observerLibrary.NotifyNLog(EStatus.Error, moveResult.msg);
+                            return moveResult.status;
+                        }
+                        break;
+                    case ChargeFlowTable charge:
+
+                        var chargeResult = await scope.missionTableLibrary.UpsertFlow(charge);
+
+                        if (!chargeResult.status)
+                        {
+                            await scope.observerLibrary.NotifyNLog(EStatus.Error, chargeResult.msg);
+                            return chargeResult.status;
+                        }
+                        break;
+                }
+            }
+
+            return true;
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface
 
         AmrMissionTable TargetRunningMission { get; set; }
 
-        int StartedIndex { get; set; }
+        int RunningIndex { get; set; }
 
         Task<bool> GetRunningMissionTableList();
 

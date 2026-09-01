@@ -53,17 +53,17 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
             }
         }
 
-        int _startedIndex { get; set; } = 0;
+        int _runningIndex { get; set; } = 0;
 
-        public int StartedIndex
+        public int RunningIndex
         {
             get
             {
-                return _startedIndex;
+                return _runningIndex;
             }
             set
             {
-                _startedIndex = value;
+                _runningIndex = value;
             }
         }
 
@@ -92,12 +92,12 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
             {
                 ListRunningMission.Clear();
                 ListRunningMission = listTable;
-                StartedIndex = 0;
+                RunningIndex = 0;
             }
             else
             {
                 ListRunningMission.Clear();
-                StartedIndex = 0;
+                RunningIndex = 0;
             }
 
             return true;
@@ -105,9 +105,9 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
 
         public async Task<bool> GetRunningMissionTableTarget()
         {
-            TargetRunningMission = ListRunningMission[StartedIndex];
+            TargetRunningMission = ListRunningMission[RunningIndex];
 
-            StartedIndex = StartedIndex + 1;
+            RunningIndex = RunningIndex + 1;
 
             return true;
         }

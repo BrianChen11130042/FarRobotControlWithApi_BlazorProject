@@ -62,7 +62,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
         public bool IsNextRunningMissionTarget()
         {
-            if(IDataLib.StartedIndex < IDataLib.ListRunningMission.Count)
+            if(IDataLib.RunningIndex < IDataLib.ListRunningMission.Count)
             {
                 return true;
             }
