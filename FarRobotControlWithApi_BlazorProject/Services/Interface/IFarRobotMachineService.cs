@@ -30,6 +30,8 @@ namespace FarRobotControlWithApi_BlazorProject.Services.Interface
 
         Task<bool> RetryMission(Guid missionId);
 
+        Task<bool> ContinueMission(Guid missionId);
+
         event dgAmrMissionUpdated dgAmrMissionUpdate;
 
         event dgAmrMissionParamUpdated dgAmrMissionParamUpdate;

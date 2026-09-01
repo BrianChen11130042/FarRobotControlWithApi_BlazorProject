@@ -5,6 +5,7 @@
         DISPATCH_REQUEST,
         CANCEL_REQUEST,
         RETRY_REQUEST,
+        CONTINUE_REQUEST,
 
         RUNNING,
         FAILED,

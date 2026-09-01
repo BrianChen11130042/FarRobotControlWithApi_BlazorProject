@@ -10,11 +10,15 @@
 
         bool IsRetryMission();
 
+        bool IsContinueMission();
+
         Task<bool> DispatchNewMission();
 
         Task<bool> DispatchCancelMission();
 
         Task<bool> DispatchRetryMission();
+
+        Task<bool> DispatchContinueMission();
 
         Task<bool> UpsertMissionTable();
 

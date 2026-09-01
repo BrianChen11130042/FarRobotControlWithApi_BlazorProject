@@ -90,6 +90,20 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             }
         }
 
+        public bool IsContinueMission()
+        {
+            if (string.Equals(IDataLib.AmrMission.MissionState,
+                              EMissionState.CONTINUE_REQUEST.ToString(),
+                              StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> DispatchNewMission()
         {
             foreach (FlowBase flow in IDataLib.AmrMission.Flows)
@@ -283,6 +297,21 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
                 {
                     return false;
                 }
+            }
+
+            return true;
+        }
+
+        public async Task<bool> DispatchContinueMission()
+        {
+            if (!await _cancelFailedMission())
+            {
+                return false;
+            }
+
+            if (!IDataLib.AmrMission.Flows.Any(f => f.IsError && !f.IsCancel))
+            {
+                IDataLib.AmrMission.MissionState = EMissionState.RUNNING.ToString();
             }
 
             return true;

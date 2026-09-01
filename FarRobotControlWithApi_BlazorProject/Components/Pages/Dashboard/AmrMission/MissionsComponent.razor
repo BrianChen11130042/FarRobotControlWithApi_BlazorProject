@@ -12,8 +12,9 @@
     <ToolbarTemplate>
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
             <DxToolbarItem IconCssClass="oi oi-plus" Click="_clickNewMission" />
-            <DxToolbarItem IconCssClass="oi oi-media-stop" Enabled="@missionSelected" Click="_clickCancelMission" RenderStyle="ButtonRenderStyle.Danger"/>
             <DxToolbarItem IconCssClass="oi oi-reload" Enabled="@missionSelected" Click="_clickRetryMission" RenderStyle="ButtonRenderStyle.Warning" />
+            <DxToolbarItem IconCssClass="oi oi-media-skip-forward" Enabled="@missionSelected" Click="_clickContinueMission" RenderStyle="ButtonRenderStyle.Info" />
+            <DxToolbarItem IconCssClass="oi oi-media-stop" Enabled="@missionSelected" Click="_clickCancelMission" RenderStyle="ButtonRenderStyle.Danger"/>
         </DxToolbar>
     </ToolbarTemplate>
 
@@ -132,6 +133,29 @@
         else
         {
             IToastMsg.NotifyError("Retry Mission Fail");
+        }
+    }
+
+    async Task _clickContinueMission()
+    {
+        AmrMissionTable? target = targetMission as AmrMissionTable;
+
+        if (target == null)
+        {
+            IToastMsg.NotifyError("Continue Mission Fail");
+            return;
+        }
+
+        IToastMsg.NotifyInfo("Start Continue Mission");
+
+        if (await machineService.ContinueMission(target.Id))
+        {
+            await _loadPageInform();
+            IToastMsg.NotifySuccess("Continue Mission Success");
+        }
+        else
+        {
+            IToastMsg.NotifyError("Continue Mission Fail");
         }
     }
 

@@ -77,6 +77,25 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                 return cancelMission;
             }
 
+            AmrMissionTable? continueMission = listAmrMissionInQueue.Where(x => string.Equals(x.MissionState,
+                                                                                            EMissionState.CONTINUE_REQUEST.ToString(),
+                                                                                            StringComparison.OrdinalIgnoreCase)
+                                                                             && x.IsStart == true
+                                                                             && x.IsFinish == false
+                                                                             && x.IsCancel == false
+                                                                             && x.IsError == true
+                                                                             && x.FlowCount != 0
+                                                                             && x.Flows.Count == x.FlowCount
+                                                                             && x.Flows.Any(f => f.IsStart && f.IsError && !f.IsFinish && !f.IsCancel))
+                                                                    .OrderBy(x => x.EstablishTime)
+                                                                    .FirstOrDefault();
+
+            if(continueMission != null)
+            {
+                return continueMission;
+            }
+
+
             AmrMissionTable? retryMission = listAmrMissionInQueue.Where(x => string.Equals(x.MissionState,
                                                                                             EMissionState.RETRY_REQUEST.ToString(),
                                                                                             StringComparison.OrdinalIgnoreCase)

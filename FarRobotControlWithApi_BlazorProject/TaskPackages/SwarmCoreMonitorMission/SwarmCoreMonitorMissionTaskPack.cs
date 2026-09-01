@@ -101,6 +101,14 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 IDataLib.TargetRunningMission.FinishTime = activeFlows.Max(x => x.FinishTime);
                 IDataLib.TargetRunningMission.MissionState = EMissionState.COMPLETED.ToString();
             }
+            else if(activeFlows.Count == 0
+                    && IDataLib.TargetRunningMission.Flows.All(x => x.IsCancel))
+            {
+                IDataLib.TargetRunningMission.FinishTime = IDataLib.TargetRunningMission.Flows.Where(x => x.CancelTime.HasValue)
+                                                                                              .Max(x => x.CancelTime);
+
+                IDataLib.TargetRunningMission.MissionState = EMissionState.COMPLETED.ToString();
+            }
             else if(activeFlows.Any(x => x.IsError))
             {
                 IDataLib.TargetRunningMission.MissionState = EMissionState.FAILED.ToString();

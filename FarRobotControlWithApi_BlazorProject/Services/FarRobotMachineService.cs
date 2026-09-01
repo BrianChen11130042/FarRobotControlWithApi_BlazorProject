@@ -143,9 +143,15 @@ namespace FarRobotControlWithApi_BlazorProject.Services
             AmrMissionTable? mission = scope.missionTableLibrary.listAmrMissionInQueue.FirstOrDefault(x => x.Id == missionId
                                                                                                         && x.IsFinish == false
                                                                                                         && x.IsCancel == false
-                                                                                                        && !string.Equals(x.MissionState,
-                                                                                                                          EMissionState.CANCEL_REQUEST.ToString(),
-                                                                                                                          StringComparison.OrdinalIgnoreCase));
+                                                                                                        && (string.Equals(x.MissionState,
+                                                                                                                          EMissionState.FAILED.ToString(),
+                                                                                                                          StringComparison.OrdinalIgnoreCase) ||
+                                                                                                            string.Equals(x.MissionState,
+                                                                                                                          EMissionState.RUNNING.ToString(),
+                                                                                                                          StringComparison.OrdinalIgnoreCase) ||
+                                                                                                            string.Equals(x.MissionState,
+                                                                                                                          EMissionState.DISPATCH_REQUEST.ToString(),
+                                                                                                                          StringComparison.OrdinalIgnoreCase)));
 
             if(mission == null)
             {
@@ -154,12 +160,10 @@ namespace FarRobotControlWithApi_BlazorProject.Services
             }
 
             mission.MissionState = EMissionState.CANCEL_REQUEST.ToString();
-            var missionResult = await scope.missionTableLibrary.UpsertMissionTable(mission);
 
-            if (!missionResult.status)
+            if (!await SetMission(mission))
             {
-                await scope.observerLibrary.NotifyNLog(EStatus.Error, missionResult.msg);
-                return missionResult.status;
+                return false;
             }
 
             return true;
@@ -278,6 +282,32 @@ namespace FarRobotControlWithApi_BlazorProject.Services
                         }
                         break;
                 }
+            }
+
+            return true;
+        }
+
+        public async Task<bool> ContinueMission(Guid missionId)
+        {
+            AmrMissionTable? mission = scope.missionTableLibrary.listAmrMissionInQueue.FirstOrDefault(x => x.Id == missionId
+                                                                                                        && x.IsFinish == false
+                                                                                                        && x.IsCancel == false
+                                                                                                        && string.Equals(x.MissionState, 
+                                                                                                                         EMissionState.FAILED.ToString(),
+                                                                                                                         StringComparison.OrdinalIgnoreCase)
+                                                                                                        && x.Flows.Any(f => f.IsStart && f.IsError && !f.IsFinish && !f.IsCancel));
+
+            if (mission == null)
+            {
+                await scope.observerLibrary.NotifyNLog(EStatus.Error, "Mission not found in queue");
+                return false;
+            }
+
+            mission.MissionState = EMissionState.CONTINUE_REQUEST.ToString();
+
+            if (!await SetMission(mission))
+            {
+                return false;
             }
 
             return true;
