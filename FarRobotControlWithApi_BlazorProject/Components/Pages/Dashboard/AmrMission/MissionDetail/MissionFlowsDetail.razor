@@ -4,7 +4,7 @@
 
 <DxGrid Data="@Flows" PageSize="20" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
     <Columns>
-        <DxGridDataColumn Caption="FlowType" Width="150px">
+        <DxGridDataColumn Caption="FlowType" Width="100px">
             <CellDisplayTemplate Context="TypeContext">
                 @_getFlowType(TypeContext.DataItem)
             </CellDisplayTemplate>
@@ -16,14 +16,15 @@
             </CellDisplayTemplate>
         </DxGridDataColumn>
 
-        <DxGridDataColumn FieldName="@nameof(FlowBase.EstablishTime)" DisplayFormat="g" Width="200px" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.StartTime)" DisplayFormat="g" Width="200px" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.StateString)" Width="150px" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.CompletePercent)" Width="100px" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.StatusCode)" Width="100px" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.EstablishTime)" DisplayFormat="g" MinWidth="150" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.Priority)" MinWidth="50" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.StartTime)" DisplayFormat="g" MinWidth="150" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.StateString)" MinWidth="100" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.CompletePercent)" MinWidth="50" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.StatusCode)" MinWidth="50" />
         <DxGridDataColumn FieldName="@nameof(FlowBase.StatusMessage)" MinWidth="250" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.FinishTime)" DisplayFormat="g" Width="200px" />
-        <DxGridDataColumn FieldName="@nameof(FlowBase.CancelTime)" DisplayFormat="g" Width="200px" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.FinishTime)" DisplayFormat="g" MinWidth="150" />
+        <DxGridDataColumn FieldName="@nameof(FlowBase.CancelTime)" DisplayFormat="g" MinWidth="150" />
     </Columns>
 </DxGrid>
 

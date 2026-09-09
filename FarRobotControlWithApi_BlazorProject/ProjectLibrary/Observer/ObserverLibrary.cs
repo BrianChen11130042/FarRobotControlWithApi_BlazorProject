@@ -1,4 +1,5 @@
 ﻿using CommonLibraryB.Tools.LogWritter;
+using FarRobotControlWithApi_BlazorProject.DTOModel;
 using FarRobotControlWithApi_BlazorProject.EFModel;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer.Interface;
 
@@ -73,13 +74,13 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer
             }
         }
 
-        public async Task NotifyMissionParamUpdated(List<string> flowNames, List<string> amrIds, List<string> cellNames)
+        public async Task NotifyMissionParamUpdated(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts)
         {
             if(osMission != null)
             {
-                foreach (var o in osMission)
+                foreach(var o in osMission)
                 {
-                    await o.HandleMissionParamUpdated(flowNames, amrIds, cellNames);
+                    await o.HandleMissionParamUpdated(flowNames, cellNames, amrArtifacts);
                 }
             }
         }

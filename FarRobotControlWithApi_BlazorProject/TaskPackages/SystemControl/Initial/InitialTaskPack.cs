@@ -1,5 +1,7 @@
 ﻿using CommonLibraryB.Library.AmrControl.Adapter;
 using CommonLibraryB.Library.AmrControl.Package;
+using CommonLibraryB.Library.AmrControl.Property.JsonModel.FarRobotSwarmCoreJson;
+using FarRobotControlWithApi_BlazorProject.DTOModel;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface;
 using FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initial.Interface;
 
@@ -73,13 +75,15 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
                 return false;
             }
 
-            IDataLib.ListAmrSerialNumber = IAmrControlPack.Packages[amrControl].property.farRobot
-                                                          .scanAmr.response.robots.Select(x => x.robot_id)
-                                                                                  .Where(x => !string.IsNullOrEmpty(x))
-                                                                                  .Distinct()
-                                                                                  .ToList();
+            List<ScanAmrInfo> listRobot = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                         .scanAmr.response.robots.Where(x => !string.IsNullOrEmpty(x.robot_id))
+                                                                                 .ToList();
 
-            if(!await IAmrControlOp.GetCellStatus(amrControl))
+            IDataLib.DcAmrArtifactMap = listRobot.GroupBy(x => x.robot_id)
+                                                 .ToDictionary(a => a.Key, 
+                                                               a => _getListArtifact(a.First().artifacts));
+
+            if (!await IAmrControlOp.GetCellStatus(amrControl))
             {
                 string nlog = IAmrControlPack.Packages[amrControl].errorLog;
                 await IDataLib.WriteNLogError(nlog);
@@ -93,6 +97,30 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
                                                                              .ToList();
 
             return true;
+        }
+
+        List<ArtifactInformDto> _getListArtifact(string artifacts)
+        {
+            List<ArtifactInformDto> result = new List<ArtifactInformDto>();
+
+            if(string.IsNullOrWhiteSpace(artifacts))
+                return result;
+
+            string[] parts = artifacts.Split('@', 2);
+
+            if(parts.Length >= 2 && 
+               !string.IsNullOrWhiteSpace(parts[0]) &&
+               !string.IsNullOrWhiteSpace(parts[1]))
+            {
+                result.Add(new ArtifactInformDto() 
+                {
+                    Type = parts[0].Trim(),
+                    Id = parts[1].Trim()
+                });
+            }
+
+            return result;
+
         }
 
         public async Task NotifyMissionUpdated()

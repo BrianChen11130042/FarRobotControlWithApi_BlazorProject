@@ -1,6 +1,7 @@
 ﻿using CommonLibraryB.Library.AmrControl.Config;
 using CommonLibraryB.Manager.WebApiClient;
 using CommonLibraryB.Tools.LogWritter;
+using FarRobotControlWithApi_BlazorProject.DTOModel;
 using FarRobotControlWithApi_BlazorProject.EFModel;
 using FarRobotControlWithApi_BlazorProject.EquipName.AmrControl;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer.Interface;
@@ -91,7 +92,7 @@ namespace FarRobotControlWithApi_BlazorProject.Services
     }
 
     public delegate Task dgAmrMissionUpdated(List<AmrMissionTable> missions);
-    public delegate Task dgAmrMissionParamUpdated(List<string> flowNames, List<string> amrIds, List<string> cellNames);
+    public delegate Task dgAmrMissionParamUpdated(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts);
 
     public partial class FarRobotMachineService : IMissionObserver
     {
@@ -103,9 +104,9 @@ namespace FarRobotControlWithApi_BlazorProject.Services
             dgAmrMissionUpdate?.Invoke(list);
         }
 
-        public async Task HandleMissionParamUpdated(List<string> flowNames, List<string> amrIds, List<string> cellNames)
+        public async Task HandleMissionParamUpdated(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts)
         {
-            dgAmrMissionParamUpdate?.Invoke(flowNames, amrIds, cellNames);
+            dgAmrMissionParamUpdate?.Invoke(flowNames, cellNames, amrArtifacts);
         }
 
         public async Task<List<AmrMissionTable>> GetAmrMissionInQueue()
@@ -113,13 +114,13 @@ namespace FarRobotControlWithApi_BlazorProject.Services
             return scope.missionTableLibrary.listAmrMissionInQueue;
         }
 
-        public async Task<(List<string> flowNames, List<string> amrIds, List<string> cellNames)> GetAmrMissionParam()
+        public async Task<(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts)> GetAmrMissionParam()
         {
             List<string> flows = scope.initialDataLibrary.ListFlowName;
-            List<string> amrs = scope.initialDataLibrary.ListAmrSerialNumber;
             List<string> cells = scope.initialDataLibrary.ListCellName;
+            Dictionary<string, List<ArtifactInformDto>> amrs = scope.initialDataLibrary.DcAmrArtifactMap;
 
-            return (flows, amrs, cells);
+            return (flows, cells, amrs);
         }
 
         public async Task<bool> SetMission(AmrMissionTable mission)

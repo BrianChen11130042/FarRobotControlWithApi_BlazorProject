@@ -1,4 +1,5 @@
-﻿using FarRobotControlWithApi_BlazorProject.EFModel;
+﻿using FarRobotControlWithApi_BlazorProject.DTOModel;
+using FarRobotControlWithApi_BlazorProject.EFModel;
 
 namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer.Interface
 {
@@ -10,13 +11,13 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer.Interface
 
         Task NotifyMissionUpdated(List<AmrMissionTable> list);
 
-        Task NotifyMissionParamUpdated(List<string> flowNames, List<string> amrIds, List<string> cellNames);
+        Task NotifyMissionParamUpdated(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts);
     }
 
     public interface IMissionObserver
     {
         Task HandleMissionUpdated(List<AmrMissionTable> list);
 
-        Task HandleMissionParamUpdated(List<string> flowNames, List<string> amrIds, List<string> cellNames);
+        Task HandleMissionParamUpdated(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts);
     }
 }

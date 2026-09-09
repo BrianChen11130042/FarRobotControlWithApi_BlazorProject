@@ -1,4 +1,5 @@
 ﻿using CommonLibraryB.Tools.LogWritter;
+using FarRobotControlWithApi_BlazorProject.DTOModel;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable.Interface;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer.Interface;
@@ -40,6 +41,21 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
 
     public partial class InitialDataLibrary
     {
+        Dictionary<string, List<ArtifactInformDto>> _dcAmrArtifactMap { get; set; } = new Dictionary<string, List<ArtifactInformDto>>();
+
+        public Dictionary<string, List<ArtifactInformDto>> DcAmrArtifactMap
+        {
+            get
+            {
+                return _dcAmrArtifactMap;
+            }
+            set
+            {
+                _dcAmrArtifactMap = value;
+            }
+        }
+
+
         List<string> _listFlowName { get; set; } = new List<string>();
 
         public List<string> ListFlowName
@@ -51,20 +67,6 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
             set
             {
                 _listFlowName = value;
-            }
-        }
-
-        List<string> _listAmrSerialNumber { get; set; } = new List<string>();
-
-        public List<string> ListAmrSerialNumber
-        {
-            get
-            {
-                return _listAmrSerialNumber;
-            }
-            set
-            {
-                _listAmrSerialNumber = value;
             }
         }
 
@@ -107,7 +109,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
 
         public async Task NotifyMissionParamUpdated()
         {
-            await IMissionObser.NotifyMissionParamUpdated(ListFlowName, ListAmrSerialNumber, ListCellName);
+            await IMissionObser.NotifyMissionParamUpdated(ListFlowName, ListCellName, DcAmrArtifactMap);
         }
 
         public async Task NotifyIntialResult(bool success, string msg)

@@ -1,6 +1,7 @@
 ﻿@using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission
 @using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.EditFlow
 @using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.PrintFlow
+@using FarRobotControlWithApi_BlazorProject.DTOModel
 @using FarRobotControlWithApi_BlazorProject.EFModel
 
 <DxPopup @ref="popup" HeaderText="New Mission" ShowCloseButton="true" CloseOnOutsideClick="false" Width="50rem">
@@ -68,7 +69,9 @@
     public List<EFlowType> ListFlowType { get; set; } = new List<EFlowType>();
 
     [Parameter, EditorRequired]
-    public List<string> ListAmrSerialNumber { get; set; } = new List<string>();
+    public Dictionary<string, List<ArtifactInformDto>> DcAmrArtifact { get; set; } = new Dictionary<string, List<ArtifactInformDto>>();
+
+    List<string> ListAmrSerialNumber => DcAmrArtifact.Keys.ToList();
 
     [Parameter, EditorRequired]
     public List<string> ListCellName { get; set; } = new List<string>();

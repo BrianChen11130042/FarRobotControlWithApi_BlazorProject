@@ -1,5 +1,6 @@
 ﻿@using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.MissionDetail
 @using FarRobotControlWithApi_BlazorProject.Components.Pages.Dashboard.AmrMission.SetNewMission
+@using FarRobotControlWithApi_BlazorProject.DTOModel
 @using FarRobotControlWithApi_BlazorProject.EFModel
 @using FarRobotControlWithApi_BlazorProject.Services.Interface
 @using FarRobotControlWithApi_BlazorProject.UITools.ToastMessage
@@ -35,7 +36,7 @@
     </DetailRowTemplate>
 </DxGrid>
 
-<PopupNewMission @ref="popUpNewMission" ListFlowType="listFlowType" ListAmrSerialNumber="listAmrSerialNumber" ListCellName="listCellName" CbOnSaved="_onNewMissionSaved" />
+<PopupNewMission @ref="popUpNewMission" ListFlowType="listFlowType" ListCellName="listCellName" DcAmrArtifact="dcAmrArtifact" CbOnSaved="_onNewMissionSaved" />
 
 @code {
     List<AmrMissionTable> listMission { get; set; } = new List<AmrMissionTable>();
@@ -46,8 +47,8 @@
     bool missionSelected => targetMission != null;
 
     List<EFlowType> listFlowType { get; set; } = new List<EFlowType>();
-    List<string> listAmrSerialNumber { get; set; } = new List<string>();
     List<string> listCellName { get; set; } = new List<string>();
+    Dictionary<string, List<ArtifactInformDto>> dcAmrArtifact { get; set; } = new Dictionary<string, List<ArtifactInformDto>>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,8 +64,8 @@
 
         var paramResult = await machineService.GetAmrMissionParam();
         listFlowType = _getExistFlowType(paramResult.flowNames);
-        listAmrSerialNumber = paramResult.amrIds;
         listCellName = paramResult.cellNames;
+        dcAmrArtifact = paramResult.amrArtifacts;
     }
 
     async Task _clickNewMission()
@@ -165,11 +166,11 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    async Task _handleMissionParamUpdate(List<string> flowNames, List<string> amrIds, List<string> cellNames)
+    async Task _handleMissionParamUpdate(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts)
     {
         listFlowType = _getExistFlowType(flowNames);
-        listAmrSerialNumber = amrIds;
         listCellName = cellNames;
+        dcAmrArtifact = amrArtifacts;
 
         await InvokeAsync(StateHasChanged);
     }
