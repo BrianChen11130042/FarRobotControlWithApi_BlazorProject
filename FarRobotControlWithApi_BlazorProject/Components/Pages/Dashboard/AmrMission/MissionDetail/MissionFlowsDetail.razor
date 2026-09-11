@@ -45,6 +45,9 @@
             case ChargeFlowTable chargeFlow:
                 return EFlowType.Charge.ToString();
 
+            case MoveArtifactFlowTable moveArtifact:
+                return EFlowType.MoveArtifact.ToString();
+
             default:
                 return "?";
         }

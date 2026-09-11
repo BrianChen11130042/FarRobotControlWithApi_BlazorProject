@@ -150,6 +150,13 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
                             return false;
                         }
                         break;
+
+                    case MoveArtifactFlowTable moveArtifactFlow:
+                        if(!await _upsertFlow<MoveArtifactFlowTable>(moveArtifactFlow, _writeDb))
+                        {
+                            return false;
+                        }
+                        break;
                 }
             }
 

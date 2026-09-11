@@ -97,7 +97,14 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
                         break;
 
                     case ChargeFlowTable chargeflow:
-                        if(! await _upsertFlow<ChargeFlowTable>(chargeflow))
+                        if(!await _upsertFlow<ChargeFlowTable>(chargeflow))
+                        {
+                            return false;
+                        }
+                        break;
+
+                    case MoveArtifactFlowTable moveArtifactflow:
+                        if(!await _upsertFlow<MoveArtifactFlowTable>(moveArtifactflow))
                         {
                             return false;
                         }

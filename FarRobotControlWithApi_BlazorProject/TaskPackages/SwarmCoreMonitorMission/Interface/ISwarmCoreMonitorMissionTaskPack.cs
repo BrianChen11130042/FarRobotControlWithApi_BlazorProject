@@ -14,7 +14,7 @@
 
         bool IsNeedGetArtifactStatus();
 
-        Task<bool> GetArtifactStatusByArtifactId();
+        Task<bool> GetArtifactStatusByAmrId();
 
         Task<bool> UpsertMissionTable();
 

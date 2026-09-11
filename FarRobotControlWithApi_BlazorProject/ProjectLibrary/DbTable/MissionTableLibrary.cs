@@ -262,20 +262,16 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                 target.FinishTime = data.FinishTime;
                 target.CancelTime = data.CancelTime;
 
-                //switch(data)
-                //{
-                //    case MoveFlowTable moveData when target is MoveFlowTable moveTarget:
-                //        moveTarget.CellName = moveData.CellName;
-                //        break;
+                switch (data)
+                {
+                    case MoveArtifactFlowTable moveArtifactData when target is MoveArtifactFlowTable moveArtifactTarget:
+                        moveArtifactTarget.LiveInfo_Status = moveArtifactData.LiveInfo_Status;
+                        moveArtifactTarget.LiveInfo_ErrorCode = moveArtifactData.LiveInfo_ErrorCode;
+                        break;
 
-                //    case ChargeFlowTable chargeData when target is ChargeFlowTable chargeTarget:
-                //        chargeTarget.CellName = chargeData.CellName;
-                //        chargeTarget.Percentage = chargeData.Percentage;
-                //        break;
-
-                //    default:
-                //        break;
-                //}
+                    default:
+                        break;
+                }
             }
             else
             {

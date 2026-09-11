@@ -189,27 +189,75 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
         public bool IsNeedGetArtifactStatus()
         {
-            foreach(FlowBase flow in IDataLib.TargetRunningMission.Flows)
-            {
-                switch(flow)
-                {
-                    default:
-                        break;
-                }
-            }
-
-            return false;
+            return IDataLib.TargetRunningMission.Flows.Any(f =>
+            f.IsStart
+            && !f.IsError
+            && !f.IsFinish
+            && !f.IsCancel
+            && (f is MoveArtifactFlowTable moveArtifact && !string.IsNullOrWhiteSpace(moveArtifact.EmbArtifactId))
+            );
         }
 
-        public async Task<bool> GetArtifactStatusByArtifactId()
+        public async Task<bool> GetArtifactStatusByAmrId()
         {
             foreach(FlowBase flow in IDataLib.TargetRunningMission.Flows)
             {
                 switch(flow)
                 {
+                    case MoveArtifactFlowTable moveArtifact :
+                        if(!await _getArtifactByMoveArtifactFlow(moveArtifact))
+                        {
+                            return false;
+                        }
+                        break;
+
                     default:
                         break;
                 }
+            }
+
+            return true;
+        }
+
+        async Task<bool> _getArtifactByMoveArtifactFlow(MoveArtifactFlowTable moveArtifact)
+        {
+            if (!moveArtifact.IsStart || moveArtifact.IsFinish || moveArtifact.IsError || moveArtifact.IsCancel 
+                || string.IsNullOrWhiteSpace(moveArtifact.AmrSerialNumber) || string.IsNullOrWhiteSpace(moveArtifact.EmbArtifactId))
+                return true;
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.amrStatusByAmrId.robotId = moveArtifact.AmrSerialNumber;
+            IAmrControlPack.Packages[amrControl].property.farRobot.amrStatusByAmrId.includeArtifact = true;
+
+            if(!await IAmrControlOp.GetAmrStatusByAmrId(amrControl))
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+
+            var amrs = IAmrControlPack.Packages[amrControl].property.farRobot.amrStatusByAmrId.response.robots
+                                                           ?.FirstOrDefault(r => string.Equals(r.robot_id, 
+                                                                                               moveArtifact.AmrSerialNumber, 
+                                                                                               StringComparison.OrdinalIgnoreCase));
+            if (amrs == null)
+                return true;
+
+            var artifact = amrs.artifacts?.FirstOrDefault(a => string.Equals(a.id,
+                                                                             moveArtifact.EmbArtifactId,
+                                                                             StringComparison.OrdinalIgnoreCase));
+
+            if (artifact?.state?.live_info == null)
+                return true;
+
+
+            if (artifact.state.live_info.TryGetValue("status", out var status))
+            {
+                moveArtifact.LiveInfo_Status = status;
+            }
+
+            if (artifact.state.live_info.TryGetValue("errorcode", out var errorCode))
+            {
+                moveArtifact.LiveInfo_ErrorCode = errorCode;
             }
 
             return true;

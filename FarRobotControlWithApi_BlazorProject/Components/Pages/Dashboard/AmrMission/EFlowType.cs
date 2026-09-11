@@ -3,6 +3,7 @@
     public enum EFlowType
     {
         Move,
-        Charge
+        Charge,
+        MoveArtifact
     }
 }

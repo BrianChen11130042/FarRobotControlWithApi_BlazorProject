@@ -17,6 +17,8 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
 
         public virtual DbSet<ChargeFlowTable> ChargeFlowTables { get; set; }
 
+        public virtual DbSet<MoveArtifactFlowTable> MoveArtifactFlowTables { get; set; }
+
         public virtual DbSet<LogTable> LogTables { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -62,6 +64,14 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
             modelBuilder.Entity<ChargeFlowTable>(entity => 
             {
                 entity.Property(e => e.CellName).HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<MoveArtifactFlowTable>(entity => 
+            {
+                entity.Property(e => e.CellName).HasMaxLength(500);
+                entity.Property(e => e.EmbArtifactId).HasMaxLength(500);
+                entity.Property(e => e.LiveInfo_Status).HasMaxLength(500);
+                entity.Property(e => e.LiveInfo_ErrorCode).HasMaxLength(500);
             });
 
             modelBuilder.Entity<LogTable>(entity => 

@@ -248,6 +248,24 @@ namespace FarRobotControlWithApi_BlazorProject.Services
 
                         break;
 
+                    case MoveArtifactFlowTable moveArtifact:
+
+                        listRetryFlow.Add(new MoveArtifactFlowTable()
+                        {
+                            Id = Guid.NewGuid(),
+                            MissionId = moveArtifact.MissionId,
+                            AmrSerialNumber = moveArtifact.AmrSerialNumber,
+                            Priority = 5,
+                            EstablishTime = now,
+                            CellName = moveArtifact.CellName,
+                            EmbArtifactId = moveArtifact.EmbArtifactId,
+                            StartParam = moveArtifact.StartParam,
+                            FinishParam = moveArtifact.FinishParam,
+                            ErrorParam = moveArtifact.ErrorParam
+                        });
+
+                        break;
+
                     default:
                         break;
                 }
@@ -280,6 +298,17 @@ namespace FarRobotControlWithApi_BlazorProject.Services
                         {
                             await scope.observerLibrary.NotifyNLog(EStatus.Error, chargeResult.msg);
                             return chargeResult.status;
+                        }
+                        break;
+
+                    case MoveArtifactFlowTable moveArtifact:
+
+                        var moveArtifactResult = await scope.missionTableLibrary.UpsertFlow(moveArtifact);
+
+                        if (!moveArtifactResult.status)
+                        {
+                            await scope.observerLibrary.NotifyNLog(EStatus.Error, moveArtifactResult.msg);
+                            return moveArtifactResult.status;
                         }
                         break;
                 }
