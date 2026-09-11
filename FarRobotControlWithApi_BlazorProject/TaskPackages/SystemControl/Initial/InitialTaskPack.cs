@@ -54,8 +54,12 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
                 await IDataLib.WriteNLogError(nlog);
                 return false;
             }
-            
-            if(!await IAmrControlOp.GetFlowName(amrControl))
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.flowName.fleetName =
+                string.IsNullOrWhiteSpace(IAmrControlPack.Packages[amrControl].config.fleetName) ? 
+                                                     "NODATA" : IAmrControlPack.Packages[amrControl].config.fleetName;
+
+            if (!await IAmrControlOp.GetFlowName(amrControl))
             {
                 string nlog = IAmrControlPack.Packages[amrControl].errorLog;
                 await IDataLib.WriteNLogError(nlog);
@@ -83,6 +87,10 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
                                                  .ToDictionary(a => a.Key, 
                                                                a => _getListArtifact(a.First().artifacts));
 
+            IAmrControlPack.Packages[amrControl].property.farRobot.cellStatus.map_name =
+                string.IsNullOrWhiteSpace(IAmrControlPack.Packages[amrControl].config.mapName) ? 
+                                                       "NODATA" : IAmrControlPack.Packages[amrControl].config.mapName;
+
             if (!await IAmrControlOp.GetCellStatus(amrControl))
             {
                 string nlog = IAmrControlPack.Packages[amrControl].errorLog;
@@ -91,8 +99,10 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
             }
 
             IDataLib.ListCellName = IAmrControlPack.Packages[amrControl].property.farRobot
-                                                   .cellStatus.response.cells.Select(x => x.display_name)
-                                                                             .Where(x => !string.IsNullOrEmpty(x))
+                                                   .cellStatus.response.cells.Where(x => !string.IsNullOrEmpty(x.map)
+                                                                                     &&  !string.IsNullOrEmpty(x.area_id)
+                                                                                     && !string.IsNullOrEmpty(x.display_name))
+                                                                             .Select(x => $"{x.map}@{x.area_id}@{x.display_name}")
                                                                              .Distinct()
                                                                              .ToList();
 
