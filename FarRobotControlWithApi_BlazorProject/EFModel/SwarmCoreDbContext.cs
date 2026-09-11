@@ -69,8 +69,11 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
             modelBuilder.Entity<MoveArtifactFlowTable>(entity => 
             {
                 entity.Property(e => e.CellName).HasMaxLength(500);
+
                 entity.Property(e => e.EmbArtifactId).HasMaxLength(500);
+
                 entity.Property(e => e.LiveInfo_Status).HasMaxLength(500);
+
                 entity.Property(e => e.LiveInfo_ErrorCode).HasMaxLength(500);
             });
 

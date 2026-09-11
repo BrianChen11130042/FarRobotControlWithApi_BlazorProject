@@ -252,12 +252,12 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
             if (artifact.state.live_info.TryGetValue("status", out var status))
             {
-                moveArtifact.LiveInfo_Status = status;
+                moveArtifact.LiveInfo_Status = status.ToString();
             }
 
             if (artifact.state.live_info.TryGetValue("errorcode", out var errorCode))
             {
-                moveArtifact.LiveInfo_ErrorCode = errorCode;
+                moveArtifact.LiveInfo_ErrorCode = errorCode.ToString();
             }
 
             return true;
