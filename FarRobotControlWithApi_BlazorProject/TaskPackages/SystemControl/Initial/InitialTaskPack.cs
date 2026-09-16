@@ -46,7 +46,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
             }
         }
 
-        public async Task<bool> InitSwarmCore()
+        async Task<bool> _getAccessToken()
         {
             if (!await IAmrControlOp.GetAccessToken(amrControl))
             {
@@ -55,8 +55,13 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
                 return false;
             }
 
+            return true;
+        }
+
+        async Task<bool> _getFlowName()
+        {
             IAmrControlPack.Packages[amrControl].property.farRobot.flowName.fleetName =
-                string.IsNullOrWhiteSpace(IAmrControlPack.Packages[amrControl].config.fleetName) ? 
+                string.IsNullOrWhiteSpace(IAmrControlPack.Packages[amrControl].config.fleetName) ?
                                                      "NODATA" : IAmrControlPack.Packages[amrControl].config.fleetName;
 
             if (!await IAmrControlOp.GetFlowName(amrControl))
@@ -71,8 +76,12 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
                                                                                 .Where(x => !string.IsNullOrEmpty(x))
                                                                                 .Distinct()
                                                                                 .ToList();
+            return true;
+        }
 
-            if(!await IAmrControlOp.GetScanAmr(amrControl))
+        async Task<bool> _getAmrWithEmbArtifact()
+        {
+            if (!await IAmrControlOp.GetScanAmr(amrControl))
             {
                 string nlog = IAmrControlPack.Packages[amrControl].errorLog;
                 await IDataLib.WriteNLogError(nlog);
@@ -83,12 +92,42 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
                                                          .scanAmr.response.robots.Where(x => !string.IsNullOrEmpty(x.robot_id))
                                                                                  .ToList();
 
-            IDataLib.DcAmrArtifactMap = listRobot.GroupBy(x => x.robot_id)
-                                                 .ToDictionary(a => a.Key, 
-                                                               a => _getListArtifact(a.First().artifacts));
+            IDataLib.DcAmrWithEmbArtifact = listRobot.GroupBy(x => x.robot_id)
+                                                 .ToDictionary(a => a.Key,
+                                                               a => _getListEmbArtifact(a.First().artifacts));
 
+            return true;
+        }
+
+        List<ArtifactInformDto> _getListEmbArtifact(string artifacts)
+        {
+            List<ArtifactInformDto> result = new List<ArtifactInformDto>();
+
+            if (string.IsNullOrWhiteSpace(artifacts))
+                return result;
+
+            string[] parts = artifacts.Split('@', 2);
+
+            if (parts.Length >= 2 
+                && !string.IsNullOrWhiteSpace(parts[0])
+                && string.Equals(parts[0], "emb_UD", StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(parts[1]))
+            {
+                result.Add(new ArtifactInformDto()
+                {
+                    Type = parts[0].Trim(),
+                    Id = parts[1].Trim()
+                });
+            }
+
+            return result;
+
+        }
+
+        async Task<bool> _getCellStatus()
+        {
             IAmrControlPack.Packages[amrControl].property.farRobot.cellStatus.map_name =
-                string.IsNullOrWhiteSpace(IAmrControlPack.Packages[amrControl].config.mapName) ? 
+                string.IsNullOrWhiteSpace(IAmrControlPack.Packages[amrControl].config.mapName) ?
                                                        "NODATA" : IAmrControlPack.Packages[amrControl].config.mapName;
 
             if (!await IAmrControlOp.GetCellStatus(amrControl))
@@ -100,7 +139,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
 
             IDataLib.ListCellName = IAmrControlPack.Packages[amrControl].property.farRobot
                                                    .cellStatus.response.cells.Where(x => !string.IsNullOrEmpty(x.map)
-                                                                                     &&  !string.IsNullOrEmpty(x.area_id)
+                                                                                     && !string.IsNullOrEmpty(x.area_id)
                                                                                      && !string.IsNullOrEmpty(x.display_name))
                                                                              .Select(x => $"{x.map}@{x.area_id}@{x.display_name}")
                                                                              .Distinct()
@@ -109,28 +148,52 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SystemControl.Initia
             return true;
         }
 
-        List<ArtifactInformDto> _getListArtifact(string artifacts)
+        async Task<bool> _getExtArtifact()
         {
-            List<ArtifactInformDto> result = new List<ArtifactInformDto>();
-
-            if(string.IsNullOrWhiteSpace(artifacts))
-                return result;
-
-            string[] parts = artifacts.Split('@', 2);
-
-            if(parts.Length >= 2 && 
-               !string.IsNullOrWhiteSpace(parts[0]) &&
-               !string.IsNullOrWhiteSpace(parts[1]))
+            if (!await IAmrControlOp.GetAllArtifactsStatus(amrControl))
             {
-                result.Add(new ArtifactInformDto() 
-                {
-                    Type = parts[0].Trim(),
-                    Id = parts[1].Trim()
-                });
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
             }
 
-            return result;
+            IDataLib.ListExtArtifact = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                           .allArtifactsStatus.response.artifacts
+                                                           .Where(x => string.Equals(x.conf_info?.category, "External", StringComparison.OrdinalIgnoreCase)
+                                                                    && string.Equals(x.state?.state, "InService", StringComparison.OrdinalIgnoreCase)
+                                                                    && x.connection_status == true
+                                                                    && !string.IsNullOrEmpty(x.id))
+                                                           .Select(x => new ArtifactInformDto()
+                                                           { 
+                                                               Type = x.conf_info.type,
+                                                               Id = x.id,
+                                                               Category = x.conf_info.category
+                                                           })
+                                                           .DistinctBy(x => x.Id)
+                                                           .ToList();
 
+            return true;                                         
+        }
+
+        public async Task<bool> InitSwarmCore()
+        {
+            
+            if(!await _getAccessToken())
+                return false;
+
+            if(!await _getFlowName())
+                return false;
+
+            if(!await _getAmrWithEmbArtifact())
+                return false;
+
+            if(!await _getCellStatus())
+                return false;
+
+            if(!await _getExtArtifact())
+                return false;
+
+            return true;
         }
 
         public async Task NotifyMissionUpdated()

@@ -11,13 +11,17 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer.Interface
 
         Task NotifyMissionUpdated(List<AmrMissionTable> list);
 
-        Task NotifyMissionParamUpdated(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts);
+        Task NotifyMissionParamUpdated(List<string> flowNames, List<string> cellNames, 
+                                       Dictionary<string, List<ArtifactInformDto>> amrEmbArtifacts, 
+                                       List<ArtifactInformDto> extArtifacts);
     }
 
     public interface IMissionObserver
     {
         Task HandleMissionUpdated(List<AmrMissionTable> list);
 
-        Task HandleMissionParamUpdated(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts);
+        Task HandleMissionParamUpdated(List<string> flowNames, List<string> cellNames, 
+                                       Dictionary<string, List<ArtifactInformDto>> amrEmbArtifacts, 
+                                       List<ArtifactInformDto> extArtifacts);
     }
 }

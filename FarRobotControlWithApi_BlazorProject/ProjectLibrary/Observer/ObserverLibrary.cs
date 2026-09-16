@@ -74,13 +74,15 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer
             }
         }
 
-        public async Task NotifyMissionParamUpdated(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts)
+        public async Task NotifyMissionParamUpdated(List<string> flowNames, List<string> cellNames, 
+                                                    Dictionary<string, List<ArtifactInformDto>> amrArtifacts, 
+                                                    List<ArtifactInformDto> extArtifacts)
         {
             if(osMission != null)
             {
                 foreach(var o in osMission)
                 {
-                    await o.HandleMissionParamUpdated(flowNames, cellNames, amrArtifacts);
+                    await o.HandleMissionParamUpdated(flowNames, cellNames, amrArtifacts, extArtifacts);
                 }
             }
         }

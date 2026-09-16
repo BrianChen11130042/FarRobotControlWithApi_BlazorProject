@@ -28,7 +28,7 @@
         @if (editFlow is not null)
         {
             <div class="border rounded p-2 mb-2" style="margin-top:12px;">
-                <EditFlowHost Flow="editFlow" ListCellName="ListCellName" ListArtifactInform="ListArtifactInform" />
+                <EditFlowHost Flow="editFlow" ListCellName="ListCellName" ListEmbArtifact="ListEmbArtifact" ListExtArtifact="ListExtArtifact" />
                 <div class="mt-3">
                     <DxButton Text="OK" Click="_clickConfirmEditFlow" RenderStyle="ButtonRenderStyle.Primary" />
                     <DxButton Text="Cancel" Click="_clickCancelEditFlow" />
@@ -72,21 +72,24 @@
     public List<string> ListCellName { get; set; } = new List<string>();
 
     [Parameter, EditorRequired]
-    public Dictionary<string, List<ArtifactInformDto>> DcAmrArtifact { get; set; } = new Dictionary<string, List<ArtifactInformDto>>();
+    public Dictionary<string, List<ArtifactInformDto>> DcAmrEmbArtifact { get; set; } = new Dictionary<string, List<ArtifactInformDto>>();
 
-    List<string> ListAmrSerialNumber => DcAmrArtifact.Keys.ToList();
+    [Parameter, EditorRequired]
+    public List<ArtifactInformDto> ListExtArtifact { get; set; } = new List<ArtifactInformDto>();
 
-    List<ArtifactInformDto> ListArtifactInform
+    List<string> ListAmrSerialNumber => DcAmrEmbArtifact.Keys.ToList();
+
+    List<ArtifactInformDto> ListEmbArtifact
     {
         get
         {
             if (string.IsNullOrWhiteSpace(missionTable.AmrSerialNumber) || 
-                !DcAmrArtifact.ContainsKey(missionTable.AmrSerialNumber))
+                !DcAmrEmbArtifact.ContainsKey(missionTable.AmrSerialNumber))
             {
                 return new List<ArtifactInformDto>();
             }
 
-            return DcAmrArtifact[missionTable.AmrSerialNumber];
+            return DcAmrEmbArtifact[missionTable.AmrSerialNumber];
         }
     }
 

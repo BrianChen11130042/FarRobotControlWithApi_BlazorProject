@@ -41,17 +41,31 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
 
     public partial class InitialDataLibrary
     {
-        Dictionary<string, List<ArtifactInformDto>> _dcAmrArtifactMap { get; set; } = new Dictionary<string, List<ArtifactInformDto>>();
+        Dictionary<string, List<ArtifactInformDto>> _dcAmrWithEmbArtifact { get; set; } = new Dictionary<string, List<ArtifactInformDto>>();
 
-        public Dictionary<string, List<ArtifactInformDto>> DcAmrArtifactMap
+        public Dictionary<string, List<ArtifactInformDto>> DcAmrWithEmbArtifact
         {
             get
             {
-                return _dcAmrArtifactMap;
+                return _dcAmrWithEmbArtifact;
             }
             set
             {
-                _dcAmrArtifactMap = value;
+                _dcAmrWithEmbArtifact = value;
+            }
+        }
+
+        List<ArtifactInformDto> _listExtArtifact { get; set; } = new List<ArtifactInformDto>();
+
+        public List<ArtifactInformDto> ListExtArtifact
+        {
+            get
+            {
+                return _listExtArtifact;
+            }
+            set
+            {
+                _listExtArtifact = value;
             }
         }
 
@@ -109,7 +123,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
 
         public async Task NotifyMissionParamUpdated()
         {
-            await IMissionObser.NotifyMissionParamUpdated(ListFlowName, ListCellName, DcAmrArtifactMap);
+            await IMissionObser.NotifyMissionParamUpdated(ListFlowName, ListCellName, DcAmrWithEmbArtifact, ListExtArtifact);
         }
 
         public async Task NotifyIntialResult(bool success, string msg)

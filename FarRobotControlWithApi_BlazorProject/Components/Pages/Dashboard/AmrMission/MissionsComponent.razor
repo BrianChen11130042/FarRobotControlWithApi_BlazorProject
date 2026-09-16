@@ -36,7 +36,8 @@
     </DetailRowTemplate>
 </DxGrid>
 
-<PopupNewMission @ref="popUpNewMission" ListFlowType="listFlowType" ListCellName="listCellName" DcAmrArtifact="dcAmrArtifact" CbOnSaved="_onNewMissionSaved" />
+<PopupNewMission @ref="popUpNewMission" ListFlowType="listFlowType" ListCellName="listCellName" 
+                 DcAmrEmbArtifact="dcAmrEmbArtifact" ListExtArtifact="listExtArtifact" CbOnSaved="_onNewMissionSaved" />
 
 @code {
     List<AmrMissionTable> listMission { get; set; } = new List<AmrMissionTable>();
@@ -48,7 +49,8 @@
 
     List<EFlowType> listFlowType { get; set; } = new List<EFlowType>();
     List<string> listCellName { get; set; } = new List<string>();
-    Dictionary<string, List<ArtifactInformDto>> dcAmrArtifact { get; set; } = new Dictionary<string, List<ArtifactInformDto>>();
+    Dictionary<string, List<ArtifactInformDto>> dcAmrEmbArtifact { get; set; } = new Dictionary<string, List<ArtifactInformDto>>();
+    List<ArtifactInformDto> listExtArtifact { get; set; } = new List<ArtifactInformDto>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,7 +67,8 @@
         var paramResult = await machineService.GetAmrMissionParam();
         listFlowType = _getExistFlowType(paramResult.flowNames);
         listCellName = paramResult.cellNames;
-        dcAmrArtifact = paramResult.amrArtifacts;
+        dcAmrEmbArtifact = paramResult.amrEmbArtifacts;
+        listExtArtifact = paramResult.extArtifacts;
     }
 
     async Task _clickNewMission()
@@ -166,11 +169,14 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    async Task _handleMissionParamUpdate(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts)
+    async Task _handleMissionParamUpdate(List<string> flowNames, List<string> cellNames, 
+                                         Dictionary<string, List<ArtifactInformDto>> amrEmbArtifacts,
+                                         List<ArtifactInformDto> extArtifacts)
     {
         listFlowType = _getExistFlowType(flowNames);
         listCellName = cellNames;
-        dcAmrArtifact = amrArtifacts;
+        dcAmrEmbArtifact = amrEmbArtifacts;
+        listExtArtifact = extArtifacts;
 
         await InvokeAsync(StateHasChanged);
     }

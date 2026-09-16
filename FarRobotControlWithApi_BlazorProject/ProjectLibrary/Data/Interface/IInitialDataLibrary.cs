@@ -6,7 +6,9 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface
     {
         Task<bool> InitAmrMissionInQueue();
 
-        Dictionary<string, List<ArtifactInformDto>> DcAmrArtifactMap { get; set; }
+        Dictionary<string, List<ArtifactInformDto>> DcAmrWithEmbArtifact { get; set; }
+
+        List<ArtifactInformDto> ListExtArtifact { get; set; }
 
         List<string> ListFlowName { get; set; }
 

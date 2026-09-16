@@ -23,7 +23,8 @@ namespace FarRobotControlWithApi_BlazorProject.Services.Interface
         //任務
         Task<List<AmrMissionTable>> GetAmrMissionInQueue();
 
-        Task<(List<string> flowNames, List<string> cellNames, Dictionary<string, List<ArtifactInformDto>> amrArtifacts)> GetAmrMissionParam();
+        Task<(List<string> flowNames, List<string> cellNames, 
+             Dictionary<string, List<ArtifactInformDto>> amrEmbArtifacts,List<ArtifactInformDto> extArtifacts)> GetAmrMissionParam();
 
         Task<bool> SetMission(AmrMissionTable mission);
 
