@@ -236,7 +236,8 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
         async Task<bool> _getArtifactByMoveArtifactFlow(MoveArtifactFlowTable moveArtifact)
         {
             if (!moveArtifact.IsStart || moveArtifact.IsFinish || moveArtifact.IsError || moveArtifact.IsCancel 
-                || string.IsNullOrWhiteSpace(moveArtifact.EmbArtifactId))
+                || string.IsNullOrWhiteSpace(moveArtifact.EmbArtifactId) 
+                || string.Equals(moveArtifact.StateString, "QUEUED", StringComparison.OrdinalIgnoreCase))
                 return true;
 
             IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = moveArtifact.EmbArtifactId;
@@ -267,7 +268,9 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
         async Task<bool> _getArtifactsByMoveArtifactsFlow(MoveArtifactsFlowTable moveArtifacts)
         {
             if (!moveArtifacts.IsStart || moveArtifacts.IsFinish || moveArtifacts.IsError || moveArtifacts.IsCancel
-                || string.IsNullOrWhiteSpace(moveArtifacts.EmbArtifactId) || string.IsNullOrWhiteSpace(moveArtifacts.ExtArtifactId))
+                || string.IsNullOrWhiteSpace(moveArtifacts.EmbArtifactId) 
+                || string.IsNullOrWhiteSpace(moveArtifacts.ExtArtifactId)
+                || string.Equals(moveArtifacts.StateString, "QUEUED", StringComparison.OrdinalIgnoreCase))
                 return true;
 
             //emb
