@@ -4,6 +4,7 @@
     {
         Move,
         Charge,
-        MoveArtifact
+        MoveArtifact,
+        MoveArtifacts
     }
 }

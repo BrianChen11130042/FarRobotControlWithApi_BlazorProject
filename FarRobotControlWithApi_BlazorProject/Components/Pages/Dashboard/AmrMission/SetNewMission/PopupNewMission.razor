@@ -133,6 +133,17 @@
             case EFlowType.MoveArtifact:
                 return new MoveArtifactFlowTable() { StartParam = 1, FinishParam = 2, ErrorParam = 3 };
 
+            case EFlowType.MoveArtifacts:
+                return new MoveArtifactsFlowTable()
+                {
+                    EmbStartParam = 1,
+                    EmbFinishParam = 2,
+                    EmbErrorParam = 3,
+                    ExtStartParam = 1,
+                    ExtFinishParam = 2,
+                    ExtErrorParam = 3,
+                };
+
             default:
                 return null;
         }
@@ -167,6 +178,9 @@
 
             case MoveArtifactFlowTable moveArtifact:
                 return EFlowType.MoveArtifact.ToString();
+
+            case MoveArtifactsFlowTable moveArtifacts:
+                return EFlowType.MoveArtifacts.ToString();
 
             default:
                 return "?";

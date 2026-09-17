@@ -272,6 +272,28 @@ namespace FarRobotControlWithApi_BlazorProject.Services
 
                         break;
 
+                    case MoveArtifactsFlowTable moveArtifacts:
+
+                        listRetryFlow.Add(new MoveArtifactsFlowTable()
+                        {
+                            Id = Guid.NewGuid(),
+                            MissionId = moveArtifacts.MissionId,
+                            AmrSerialNumber= moveArtifacts.AmrSerialNumber,
+                            Priority = 5,
+                            EstablishTime = now,
+                            CellName = moveArtifacts.CellName,
+                            EmbArtifactId= moveArtifacts.EmbArtifactId,
+                            EmbStartParam = moveArtifacts.EmbStartParam,
+                            EmbFinishParam = moveArtifacts.EmbFinishParam,
+                            EmbErrorParam = moveArtifacts.EmbErrorParam,
+                            ExtArtifactId = moveArtifacts.ExtArtifactId,
+                            ExtStartParam = moveArtifacts.ExtStartParam,
+                            ExtFinishParam = moveArtifacts.ExtFinishParam,
+                            ExtErrorParam = moveArtifacts.ExtErrorParam,
+                        });
+
+                        break;
+
                     default:
                         break;
                 }
@@ -315,6 +337,17 @@ namespace FarRobotControlWithApi_BlazorProject.Services
                         {
                             await scope.observerLibrary.NotifyNLog(EStatus.Error, moveArtifactResult.msg);
                             return moveArtifactResult.status;
+                        }
+                        break;
+
+                    case MoveArtifactsFlowTable moveArtifacts:
+
+                        var moveArtifactsResult = await scope.missionTableLibrary.UpsertFlow(moveArtifacts);
+
+                        if (!moveArtifactsResult.status)
+                        {
+                            await scope.observerLibrary.NotifyNLog(EStatus.Error, moveArtifactsResult.msg);
+                            return moveArtifactsResult.status;
                         }
                         break;
                 }

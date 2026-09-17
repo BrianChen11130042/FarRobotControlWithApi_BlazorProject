@@ -1,5 +1,6 @@
 ﻿using CommonLibraryB.Library.AmrControl.Adapter;
 using CommonLibraryB.Library.AmrControl.Package;
+using CommonLibraryB.Library.AmrControl.Property.JsonModel.FarRobotSwarmCoreJson;
 using FarRobotControlWithApi_BlazorProject.EFModel;
 using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data.Interface;
 using FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission.Interface;
@@ -131,6 +132,13 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
                         }
                         break;
 
+                    case MoveArtifactsFlowTable moveArtifactsFlow:
+                        if(!await _dispatchMoveArtifactsFlow(moveArtifactsFlow))
+                        {
+                            return false;
+                        }
+                        break;
+
                     default:
                         break;
                 }
@@ -208,6 +216,37 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             {
                 moveArtifactFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.response.swarm_data.flow_id;
                 moveArtifactFlow.StartTime = DateTime.Now;
+                return true;
+            }
+            else
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+        }
+
+        async Task<bool> _dispatchMoveArtifactsFlow(MoveArtifactsFlowTable moveArtifactsFlow)
+        {
+            if (moveArtifactsFlow.IsStart == true)
+                return true;
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.priority = moveArtifactsFlow.Priority.ToString();
+            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.assigned_robot = moveArtifactsFlow.AmrSerialNumber;
+            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.goal_MeSfB = moveArtifactsFlow.CellName;
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.artifact_id_cfjoZ = moveArtifactsFlow.EmbArtifactId;
+            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.value_cfjoZ =
+                 $"startparam:{moveArtifactsFlow.EmbStartParam},finishstatusparam:{moveArtifactsFlow.EmbFinishParam},errorstatusparam:{moveArtifactsFlow.EmbErrorParam}";
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.artifact_id_VsQoQ = moveArtifactsFlow.ExtArtifactId;
+            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.value_VsQoQ =
+                 $"extstartparam:{moveArtifactsFlow.ExtStartParam},extfinishparam:{moveArtifactsFlow.ExtFinishParam},exterrorparam:{moveArtifactsFlow.ExtErrorParam}";
+
+            if(await IAmrControlOp.SetMoveArtifactsFlow(amrControl))
+            {
+                moveArtifactsFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.response.swarm_data.flow_id;
+                moveArtifactsFlow.StartTime = DateTime.Now;
                 return true;
             }
             else
@@ -316,6 +355,13 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
 
                     case MoveArtifactFlowTable moveArtifactFlow:
                         if(!await _dispatchMoveArtifactFlow(moveArtifactFlow))
+                        {
+                            return false;
+                        }
+                        break;
+
+                    case MoveArtifactsFlowTable moveArtifactsFlow:
+                        if(!await _dispatchMoveArtifactsFlow(moveArtifactsFlow))
                         {
                             return false;
                         }

@@ -1,0 +1,16 @@
+﻿@using FarRobotControlWithApi_BlazorProject.EFModel
+
+<div>
+    <div><b>Cell</b> : @Flow.CellName</div>
+    <div><b>Emb Artifact</b> : @Flow.EmbArtifactId</div>
+    <div><b>Emb Start/Finish/Error Param</b> : @Flow.EmbStartParam / @Flow.EmbFinishParam / @Flow.EmbErrorParam</div>
+    <div><b>Emb Status/ErrorCode LiveInfo</b> : @Flow.Emb_LiveInfo_Status / @Flow.Emb_LiveInfo_ErrorCode</div>
+    <div><b>Ext Artifact</b> : @Flow.ExtArtifactId</div>
+    <div><b>Ext Start/Finish/Error Param</b> : @Flow.ExtStartParam / @Flow.ExtFinishParam / @Flow.ExtErrorParam</div>
+    <div><b>Ext Status/ErrorCode LiveInfo</b> : @Flow.Ext_LiveInfo_Status / @Flow.Ext_LiveInfo_ErrorCode</div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public MoveArtifactsFlowTable Flow { get; set; } = null!;
+}

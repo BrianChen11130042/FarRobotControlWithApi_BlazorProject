@@ -44,9 +44,9 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
             return pack.IsNeedGetArtifactStatus();
         }
 
-        public Task<bool> GetArtifactStatusByAmrId()
+        public Task<bool> GetArtifactStatusByArtifactId()
         {
-            return pack.GetArtifactStatusByAmrId();
+            return pack.GetArtifactStatusByArtifactId();
         }
 
         public Task<bool> UpsertMissionTable()
@@ -153,7 +153,7 @@ namespace FarRobotControlWithApi_BlazorProject.Tasks.SwarmCoreMonitorMission
                     switch(S3)
                     {
                         case 0:
-                            if(await GetArtifactStatusByAmrId())
+                            if(await GetArtifactStatusByArtifactId())
                             {
                                 Set(EMonitorMission.UpsertMissionTable, 0);
                             }

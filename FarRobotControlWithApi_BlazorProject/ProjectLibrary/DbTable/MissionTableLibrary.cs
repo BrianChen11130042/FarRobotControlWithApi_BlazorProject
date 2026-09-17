@@ -269,6 +269,13 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                         moveArtifactTarget.LiveInfo_ErrorCode = moveArtifactData.LiveInfo_ErrorCode;
                         break;
 
+                    case MoveArtifactsFlowTable moveArtifactsData when target is MoveArtifactsFlowTable moveArtifactsTarget:
+                        moveArtifactsTarget.Emb_LiveInfo_Status = moveArtifactsData.Emb_LiveInfo_Status;
+                        moveArtifactsTarget.Emb_LiveInfo_ErrorCode = moveArtifactsData.Emb_LiveInfo_ErrorCode;
+                        moveArtifactsTarget.Ext_LiveInfo_Status = moveArtifactsData.Ext_LiveInfo_Status;
+                        moveArtifactsTarget.Ext_LiveInfo_ErrorCode = moveArtifactsData.Ext_LiveInfo_ErrorCode;
+                        break;
+
                     default:
                         break;
                 }

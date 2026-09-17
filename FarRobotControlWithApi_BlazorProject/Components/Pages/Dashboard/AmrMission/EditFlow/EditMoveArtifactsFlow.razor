@@ -1,0 +1,85 @@
+﻿@using FarRobotControlWithApi_BlazorProject.DTOModel
+@using FarRobotControlWithApi_BlazorProject.EFModel
+
+<DxFormLayout>
+    <DxFormLayoutItem Caption="Cell Name" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+        <DxComboBox Data="@ListCellName" @bind-Value="Flow.CellName" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem Caption="Emb Artifact Id" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+        <DxComboBox Data="@ListEmbArtifactId" @bind-Value="Flow.EmbArtifactId" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem Caption="Emb Start Param" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+        <DxSpinEdit @bind-Value="Flow.EmbStartParam" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem Caption="Emb Finish Param" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+        <DxSpinEdit @bind-Value="Flow.EmbFinishParam" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem Caption="Emb Error Param" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+        <DxSpinEdit @bind-Value="Flow.EmbErrorParam" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem Caption="Ext Artifact Id" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+        <DxComboBox Data="@ListExtArtifactId" @bind-Value="Flow.ExtArtifactId" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem Caption="Ext Start Param" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+        <DxSpinEdit @bind-Value="Flow.ExtStartParam" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem Caption="Ext Finish Param" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+        <DxSpinEdit @bind-Value="Flow.ExtFinishParam" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem Caption="Ext Error Param" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="4">
+        <DxSpinEdit @bind-Value="Flow.ExtErrorParam" />
+    </DxFormLayoutItem>
+</DxFormLayout>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public MoveArtifactsFlowTable Flow { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public List<string> ListCellName { get; set; } = new List<string>();
+
+    [Parameter, EditorRequired]
+    public List<ArtifactInformDto> ListEmbArtifact { get; set; } = new List<ArtifactInformDto>();
+
+    [Parameter, EditorRequired]
+    public List<ArtifactInformDto> ListExtArtifact { get; set; } = new List<ArtifactInformDto>();
+
+    List<string> ListEmbArtifactId => ListEmbArtifact.Where(x => string.Equals(x.Type, "emb_UD", StringComparison.OrdinalIgnoreCase))
+                                                     .Select(x => x.Id)
+                                                     .Where(x => !string.IsNullOrWhiteSpace(x))
+                                                     .Distinct()
+                                                     .ToList();
+
+    List<string> ListExtArtifactId => ListExtArtifact.Where(x => string.Equals(x.Type, "ext_UD", StringComparison.OrdinalIgnoreCase))
+                                                     .Select(x => x.Id)
+                                                     .Where(x => !string.IsNullOrWhiteSpace(x))
+                                                     .Distinct()
+                                                     .ToList();
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrEmpty(Flow.CellName) && ListCellName.Count > 0)
+        {
+            Flow.CellName = ListCellName[0];
+        }
+
+        if (ListEmbArtifactId.Count > 0)
+        {
+            Flow.EmbArtifactId = ListEmbArtifactId[0];
+        }
+
+        if (ListExtArtifactId.Count > 0)
+        {
+            Flow.ExtArtifactId = ListExtArtifactId[0];
+        }
+    }
+}
