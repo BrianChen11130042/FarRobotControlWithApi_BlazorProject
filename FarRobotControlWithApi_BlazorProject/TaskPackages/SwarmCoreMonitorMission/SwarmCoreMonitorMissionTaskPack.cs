@@ -249,18 +249,30 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 return false;
             }
 
-            Dictionary<string, JsonElement> liveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+            var response = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+            bool isRunning = response.service != null
+                             && response.service.Values.Any(s => string.Equals(s?.response?.response_msg, "running",
+                                                                               StringComparison.OrdinalIgnoreCase));
+
+            bool readLiveInfo = isRunning || moveArtifact.EmbWasRunning;
+
+            if (readLiveInfo)
+            {
+                Dictionary<string, JsonElement> liveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
                                                                       .artifactStatusByArtifactId.response.state.live_info;
 
-            if (liveInfo.TryGetValue("status", out var status))
-            {
-                moveArtifact.LiveInfo_Status = status.ToString();
+                if (liveInfo.TryGetValue("status", out var status))
+                {
+                    moveArtifact.LiveInfo_Status = status.ToString();
+                }
+
+                if (liveInfo.TryGetValue("errorcode", out var errorCode))
+                {
+                    moveArtifact.LiveInfo_ErrorCode = errorCode.ToString();
+                }
             }
 
-            if (liveInfo.TryGetValue("errorcode", out var errorCode))
-            {
-                moveArtifact.LiveInfo_ErrorCode = errorCode.ToString();
-            }
+            moveArtifact.EmbWasRunning = isRunning;
 
             return true;
         }
@@ -283,18 +295,30 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 return false;
             }
 
-            Dictionary<string, JsonElement> embLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+            var embResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+            bool isEmbRunning = embResponse.service != null
+                                && embResponse.service.Values.Any(s => string.Equals(s?.response?.status, "running",
+                                                                                     StringComparison.OrdinalIgnoreCase));
+
+            bool readEmbLiveInfo = isEmbRunning || moveArtifacts.EmbWasRunning;
+
+            if (readEmbLiveInfo)
+            {
+                Dictionary<string, JsonElement> embLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
                                                                          .artifactStatusByArtifactId.response.state.live_info;
 
-            if (embLiveInfo.TryGetValue("status", out var embStatus))
-            {
-                moveArtifacts.Emb_LiveInfo_Status = embStatus.ToString();
+                if (embLiveInfo.TryGetValue("status", out var embStatus))
+                {
+                    moveArtifacts.Emb_LiveInfo_Status = embStatus.ToString();
+                }
+
+                if (embLiveInfo.TryGetValue("errorcode", out var embErrorCode))
+                {
+                    moveArtifacts.Emb_LiveInfo_ErrorCode = embErrorCode.ToString();
+                }
             }
 
-            if (embLiveInfo.TryGetValue("errorcode", out var embErrorCode))
-            {
-                moveArtifacts.Emb_LiveInfo_ErrorCode = embErrorCode.ToString();
-            }
+            moveArtifacts.EmbWasRunning = isEmbRunning;
 
             //ext
             IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = moveArtifacts.ExtArtifactId;
@@ -306,18 +330,30 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 return false;
             }
 
-            Dictionary<string, JsonElement> extLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+            var extResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+            bool isExtRunning = extResponse.service != null
+                                && extResponse.service.Values.Any(s => string.Equals(s?.response?.status, "running",
+                                                                                     StringComparison.OrdinalIgnoreCase));
+
+            bool readExtLiveInfo = isExtRunning || moveArtifacts.ExtWasRunning;
+
+            if (readExtLiveInfo)
+            {
+                Dictionary<string, JsonElement> extLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
                                                                          .artifactStatusByArtifactId.response.state.live_info;
 
-            if (extLiveInfo.TryGetValue("extstatus", out var extStatus))
-            {
-                moveArtifacts.Ext_LiveInfo_Status = extStatus.ToString();
+                if (extLiveInfo.TryGetValue("extstatus", out var extStatus))
+                {
+                    moveArtifacts.Ext_LiveInfo_Status = extStatus.ToString();
+                }
+
+                if (extLiveInfo.TryGetValue("exterrorcode", out var extErrorCode))
+                {
+                    moveArtifacts.Ext_LiveInfo_ErrorCode = extErrorCode.ToString();
+                }
             }
 
-            if (extLiveInfo.TryGetValue("exterrorcode", out var extErrorCode))
-            {
-                moveArtifacts.Ext_LiveInfo_ErrorCode = extErrorCode.ToString();
-            }
+            moveArtifacts.ExtWasRunning = isExtRunning;
 
             return true;
         }

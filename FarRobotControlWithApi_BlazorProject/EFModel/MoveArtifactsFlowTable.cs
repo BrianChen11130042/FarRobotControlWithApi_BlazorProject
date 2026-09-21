@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FarRobotControlWithApi_BlazorProject.EFModel
 {
@@ -24,6 +25,9 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
         [MaxLength(500)]
         public string? Emb_LiveInfo_ErrorCode { get; set; }
 
+        [NotMapped]
+        public bool EmbWasRunning { get; set; }
+
 
         //Ext
         [MaxLength(500)]
@@ -40,5 +44,8 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
 
         [MaxLength(500)]
         public string? Ext_LiveInfo_ErrorCode { get; set; }
+
+        [NotMapped]
+        public bool ExtWasRunning { get; set; }
     }
 }
