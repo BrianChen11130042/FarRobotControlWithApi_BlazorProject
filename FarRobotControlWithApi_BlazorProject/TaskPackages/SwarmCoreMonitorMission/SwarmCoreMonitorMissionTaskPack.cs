@@ -251,7 +251,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
             var response = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
             bool isRunning = response.service != null
-                             && response.service.Values.Any(s => string.Equals(s?.response?.response_msg, "running",
+                             && response.service.Values.Any(s => string.Equals(s?.response?.status, "running",
                                                                                StringComparison.OrdinalIgnoreCase));
 
             bool readLiveInfo = isRunning || moveArtifact.EmbWasRunning;
