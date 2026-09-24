@@ -251,8 +251,8 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
             var response = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
             bool isRunning = response.service != null
-                             && response.service.Values.Any(s => string.Equals(s?.response?.status, "running",
-                                                                               StringComparison.OrdinalIgnoreCase));
+                             && response.service.TryGetValue("apiservice", out var apiService)
+                             && string.Equals(apiService?.response?.status, "running",StringComparison.OrdinalIgnoreCase);
 
             bool readLiveInfo = isRunning || moveArtifact.EmbWasRunning;
 
@@ -297,8 +297,8 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
             var embResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
             bool isEmbRunning = embResponse.service != null
-                                && embResponse.service.Values.Any(s => string.Equals(s?.response?.status, "running",
-                                                                                     StringComparison.OrdinalIgnoreCase));
+                                && embResponse.service.TryGetValue("apiservice", out var apiService)
+                                && string.Equals(apiService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
 
             bool readEmbLiveInfo = isEmbRunning || moveArtifacts.EmbWasRunning;
 
@@ -332,8 +332,8 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
             var extResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
             bool isExtRunning = extResponse.service != null
-                                && extResponse.service.Values.Any(s => string.Equals(s?.response?.status, "running",
-                                                                                     StringComparison.OrdinalIgnoreCase));
+                                && extResponse.service.TryGetValue("extservice1", out var extservice1)
+                                && string.Equals(extservice1?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
 
             bool readExtLiveInfo = isExtRunning || moveArtifacts.ExtWasRunning;
 
