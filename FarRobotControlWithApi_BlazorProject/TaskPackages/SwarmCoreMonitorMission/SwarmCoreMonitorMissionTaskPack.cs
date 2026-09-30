@@ -201,6 +201,11 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 || (f is MoveArtifactsFlowTable moveArtifacts 
                       && !string.IsNullOrWhiteSpace(moveArtifacts.EmbArtifactId)
                       && !string.IsNullOrWhiteSpace(moveArtifacts.ExtArtifactId))
+
+                || (f is RobotWinderFlowTable robotWinder
+                      && !string.IsNullOrWhiteSpace(robotWinder.WinderUnlockArtifactId)
+                      && !string.IsNullOrWhiteSpace(robotWinder.TmRobotArtifactId)
+                      && !string.IsNullOrWhiteSpace(robotWinder.WinderLockArtifactId))
                )
             );
         }
@@ -220,6 +225,13 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
                     case MoveArtifactsFlowTable moveArtifacts :
                         if(!await _getArtifactsByMoveArtifactsFlow(moveArtifacts))
+                        {
+                            return false;
+                        }
+                        break;
+
+                    case RobotWinderFlowTable RobotWinder :
+                        if(!await _getArtifactsByRobotWinderFlow(RobotWinder))
                         {
                             return false;
                         }
@@ -354,6 +366,125 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
             }
 
             moveArtifacts.ExtWasRunning = isExtRunning;
+
+            return true;
+        }
+
+        async Task<bool> _getArtifactsByRobotWinderFlow(RobotWinderFlowTable robotWinder)
+        {
+            if (!robotWinder.IsStart || robotWinder.IsFinish || robotWinder.IsError || robotWinder.IsCancel
+                || string.IsNullOrWhiteSpace(robotWinder.WinderUnlockArtifactId)
+                || string.IsNullOrWhiteSpace(robotWinder.TmRobotArtifactId)
+                || string.IsNullOrWhiteSpace(robotWinder.WinderLockArtifactId)
+                || string.Equals(robotWinder.StateString, "QUEUED", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            //winder unlock
+            IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = robotWinder.WinderUnlockArtifactId;
+
+            if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+
+            var unlockResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+            bool isUnlockRunning = unlockResponse.service != null
+                                && unlockResponse.service.TryGetValue("winderunlockservice", out var unlockService)
+                                && string.Equals(unlockService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+
+            bool readUnlockLiveInfo = isUnlockRunning || robotWinder.WinderUnlockWasRunning;
+
+            if (readUnlockLiveInfo)
+            {
+                Dictionary<string, JsonElement> extLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                                             .artifactStatusByArtifactId.response.state.live_info;
+
+                if (extLiveInfo.TryGetValue("winderunlockstatus", out var unlockStatus))
+                {
+                    robotWinder.WinderUnlock_LiveInfo_Status = unlockStatus.ToString();
+                }
+
+                if (extLiveInfo.TryGetValue("winderunlockerror", out var unlockErrorCode))
+                {
+                    robotWinder.WinderUnlock_LiveInfo_ErrorCode = unlockErrorCode.ToString();
+                }
+            }
+
+            robotWinder.WinderUnlockWasRunning = isUnlockRunning;
+
+            //Tm Robot
+            IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = robotWinder.TmRobotArtifactId;
+
+            if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+
+            var RobotResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+            bool isRobotRunning = RobotResponse.service != null
+                                && RobotResponse.service.TryGetValue("tmrobotservice", out var RobotService)
+                                && string.Equals(RobotService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+
+            bool readRobotLiveInfo = isRobotRunning || robotWinder.TmRobotWasRunning;
+
+            if (readRobotLiveInfo)
+            {
+                Dictionary<string, JsonElement> embLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                                             .artifactStatusByArtifactId.response.state.live_info;
+
+                if (embLiveInfo.TryGetValue("liveinforobotstatus", out var RobotStatus))
+                {
+                    robotWinder.TmRobot_LiveInfo_Status = RobotStatus.ToString();
+                }
+
+                if (embLiveInfo.TryGetValue("liveinforoboterrorcode", out var RobotErrorCode))
+                {
+                    robotWinder.TmRobot_LiveInfo_ErrorCode = RobotErrorCode.ToString();
+                }
+            }
+
+            robotWinder.TmRobotWasRunning = isRobotRunning;
+
+
+            //winder lock
+            IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = robotWinder.WinderLockArtifactId;
+
+            if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+
+            var lockResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+            bool isLockRunning = lockResponse.service != null
+                                && lockResponse.service.TryGetValue("winderlockservice", out var lockService)
+                                && string.Equals(lockService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+
+            bool readlockLiveInfo = isLockRunning || robotWinder.WinderLockWasRunning;
+
+            if (readlockLiveInfo)
+            {
+                Dictionary<string, JsonElement> extLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                                             .artifactStatusByArtifactId.response.state.live_info;
+
+                if (extLiveInfo.TryGetValue("winderlockstatus", out var LockStatus))
+                {
+                    robotWinder.WinderLock_LiveInfo_Status = LockStatus.ToString();
+                }
+
+                if (extLiveInfo.TryGetValue("winderlockerror", out var LockErrorCode))
+                {
+                    robotWinder.WinderLock_LiveInfo_ErrorCode = LockErrorCode.ToString();
+                }
+            }
+
+            robotWinder.WinderLockWasRunning = isLockRunning;
+
 
             return true;
         }

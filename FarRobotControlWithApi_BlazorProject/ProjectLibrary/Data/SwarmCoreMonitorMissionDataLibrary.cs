@@ -164,6 +164,13 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.Data
                             return false;
                         }
                         break;
+
+                    case RobotWinderFlowTable robotWinderFlow:
+                        if(!await _upsertFlow<RobotWinderFlowTable>(robotWinderFlow, _writeDb))
+                        {
+                            return false;
+                        }
+                        break;
                 }
             }
 

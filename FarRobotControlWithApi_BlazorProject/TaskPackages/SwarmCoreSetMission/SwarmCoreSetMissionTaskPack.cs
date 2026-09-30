@@ -139,6 +139,13 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
                         }
                         break;
 
+                    case RobotWinderFlowTable robotWinderFlow:
+                        if(!await _dispatchRobotWinderFlow(robotWinderFlow))
+                        {
+                            return false;
+                        }
+                        break;
+
                     default:
                         break;
                 }
@@ -257,6 +264,43 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             }
         }
 
+        async Task<bool> _dispatchRobotWinderFlow(RobotWinderFlowTable robotWinderFlow)
+        {
+            if (robotWinderFlow.IsStart == true)
+                return true;
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.priority = robotWinderFlow.Priority.ToString();
+            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.assigned_robot = robotWinderFlow.AmrSerialNumber;
+            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.goal_Oy8t1 = robotWinderFlow.CellName;
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.artifact_id_aBJDC = robotWinderFlow.WinderUnlockArtifactId;
+            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.value_aBJDC =
+                $"setunlockfinish:{robotWinderFlow.WinderUnlockFinishParam},setunlockerror:{robotWinderFlow.WinderUnlockErrorParam}";
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.artifact_id_hdN6Z = robotWinderFlow.TmRobotArtifactId;
+            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.value_hdN6Z =
+                $"setrobotstarttype:{robotWinderFlow.TmRobotStartParam},setrobotfinish:{robotWinderFlow.TmRobotFinishParam},setroboterror:{robotWinderFlow.TmRobotErrorParam}";
+
+            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.artifact_id_6zfN9 = robotWinderFlow.WinderLockArtifactId;
+            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.value_6zfN9 =
+                $"setlockfinish:{robotWinderFlow.WinderLockFinishParam},setlockerror:{robotWinderFlow.WinderLockErrorParam}";
+
+            if(await IAmrControlOp.SetRobotWinderFlow(amrControl))
+            {
+                robotWinderFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.response.swarm_data.flow_id;
+                robotWinderFlow.StartTime = DateTime.Now;
+
+                return true;
+            }
+            else
+            {
+                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                await IDataLib.WriteNLogError(nlog);
+                return false;
+            }
+
+        }
+
         public async Task<bool> DispatchCancelMission()
         {
             foreach (FlowBase flow in IDataLib.AmrMission.Flows)
@@ -362,6 +406,13 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
 
                     case MoveArtifactsFlowTable moveArtifactsFlow:
                         if(!await _dispatchMoveArtifactsFlow(moveArtifactsFlow))
+                        {
+                            return false;
+                        }
+                        break;
+
+                    case RobotWinderFlowTable robotWinderFlow:
+                        if(!await _dispatchRobotWinderFlow(robotWinderFlow))
                         {
                             return false;
                         }

@@ -294,6 +294,30 @@ namespace FarRobotControlWithApi_BlazorProject.Services
 
                         break;
 
+                    case RobotWinderFlowTable robotWinder:
+
+                        listRetryFlow.Add(new RobotWinderFlowTable() 
+                        {
+                            Id = Guid.NewGuid(),
+                            MissionId = robotWinder.MissionId,
+                            AmrSerialNumber = robotWinder.AmrSerialNumber,
+                            Priority = 5,
+                            EstablishTime = now,
+                            CellName = robotWinder.CellName,
+                            WinderUnlockArtifactId = robotWinder.WinderUnlockArtifactId,
+                            WinderUnlockFinishParam = robotWinder.WinderUnlockFinishParam,
+                            WinderUnlockErrorParam = robotWinder.WinderUnlockErrorParam,
+                            TmRobotArtifactId = robotWinder.TmRobotArtifactId,
+                            TmRobotStartParam = robotWinder.TmRobotStartParam,
+                            TmRobotFinishParam = robotWinder.TmRobotFinishParam,
+                            TmRobotErrorParam = robotWinder.TmRobotErrorParam,
+                            WinderLockArtifactId = robotWinder.WinderLockArtifactId,
+                            WinderLockFinishParam = robotWinder.WinderLockFinishParam,
+                            WinderLockErrorParam = robotWinder.WinderLockErrorParam
+                        });
+
+                        break;
+
                     default:
                         break;
                 }
@@ -348,6 +372,17 @@ namespace FarRobotControlWithApi_BlazorProject.Services
                         {
                             await scope.observerLibrary.NotifyNLog(EStatus.Error, moveArtifactsResult.msg);
                             return moveArtifactsResult.status;
+                        }
+                        break;
+
+                    case RobotWinderFlowTable robotWinder:
+
+                        var robotWinderResult = await scope.missionTableLibrary.UpsertFlow(robotWinder);
+
+                        if(!robotWinderResult.status)
+                        {
+                            await scope.observerLibrary.NotifyNLog(EStatus.Error, robotWinderResult.msg);
+                            return robotWinderResult.status;
                         }
                         break;
                 }

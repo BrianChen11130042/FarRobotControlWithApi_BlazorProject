@@ -5,6 +5,7 @@
         Move,
         Charge,
         MoveArtifact,
-        MoveArtifacts
+        MoveArtifacts,
+        RobotWinder
     }
 }

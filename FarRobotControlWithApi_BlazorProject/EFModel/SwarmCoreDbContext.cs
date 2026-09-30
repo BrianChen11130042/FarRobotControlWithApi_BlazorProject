@@ -21,6 +21,8 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
 
         public virtual DbSet<MoveArtifactsFlowTable> MoveArtifactsFlowTables { get; set; }
 
+        public virtual DbSet<RobotWinderFlowTable> RobotWinderFlowTables { get; set; }
+
         public virtual DbSet<LogTable> LogTables { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -90,6 +92,23 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
                 entity.Property(e => e.ExtArtifactId).HasMaxLength(500);
                 entity.Property(e => e.Ext_LiveInfo_Status).HasMaxLength(500);
                 entity.Property(e => e.Ext_LiveInfo_ErrorCode).HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<RobotWinderFlowTable>(entity =>
+            {
+                entity.Property(e => e.CellName).HasMaxLength(500);
+
+                entity.Property(e => e.WinderUnlockArtifactId).HasMaxLength(500);
+                entity.Property(e => e.WinderUnlock_LiveInfo_Status).HasMaxLength(500);
+                entity.Property(e => e.WinderUnlock_LiveInfo_ErrorCode).HasMaxLength(500);
+
+                entity.Property(e => e.TmRobotArtifactId).HasMaxLength(500);
+                entity.Property(e => e.TmRobot_LiveInfo_Status).HasMaxLength(500);
+                entity.Property(e => e.TmRobot_LiveInfo_ErrorCode).HasMaxLength(500);
+
+                entity.Property(e => e.WinderLockArtifactId).HasMaxLength(500);
+                entity.Property(e => e.WinderLock_LiveInfo_Status).HasMaxLength(500);
+                entity.Property(e => e.WinderLock_LiveInfo_ErrorCode).HasMaxLength(500);
             });
 
             modelBuilder.Entity<LogTable>(entity => 

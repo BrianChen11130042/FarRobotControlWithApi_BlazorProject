@@ -279,6 +279,18 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                         moveArtifactsTarget.ExtWasRunning = moveArtifactsData.ExtWasRunning;
                         break;
 
+                    case RobotWinderFlowTable robotWinderData when target is RobotWinderFlowTable robotWinderTarget:
+                        robotWinderTarget.WinderUnlock_LiveInfo_Status = robotWinderData.WinderUnlock_LiveInfo_Status;
+                        robotWinderTarget.WinderUnlock_LiveInfo_ErrorCode = robotWinderData.WinderUnlock_LiveInfo_ErrorCode;
+                        robotWinderTarget.TmRobot_LiveInfo_Status = robotWinderData.TmRobot_LiveInfo_Status;
+                        robotWinderTarget.TmRobot_LiveInfo_ErrorCode = robotWinderData.TmRobot_LiveInfo_ErrorCode;
+                        robotWinderTarget.WinderLock_LiveInfo_Status = robotWinderData.WinderLock_LiveInfo_Status;
+                        robotWinderTarget.WinderLock_LiveInfo_ErrorCode = robotWinderData.WinderLock_LiveInfo_ErrorCode;
+                        robotWinderTarget.WinderUnlockWasRunning = robotWinderData.WinderUnlockWasRunning;
+                        robotWinderTarget.TmRobotWasRunning = robotWinderData.TmRobotWasRunning;
+                        robotWinderTarget.WinderLockWasRunning = robotWinderData.WinderLockWasRunning;
+                        break;
+
                     default:
                         break;
                 }

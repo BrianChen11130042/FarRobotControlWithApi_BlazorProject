@@ -144,6 +144,18 @@
                     ExtErrorParam = 3,
                 };
 
+            case EFlowType.RobotWinder:
+                return new RobotWinderFlowTable()
+                {
+                    WinderUnlockFinishParam = 1,
+                    WinderUnlockErrorParam = 2,
+                    TmRobotStartParam = 1,
+                    TmRobotFinishParam = 2,
+                    TmRobotErrorParam = 3,
+                    WinderLockFinishParam = 1,
+                    WinderLockErrorParam = 2
+                };
+
             default:
                 return null;
         }
@@ -181,6 +193,9 @@
 
             case MoveArtifactsFlowTable moveArtifacts:
                 return EFlowType.MoveArtifacts.ToString();
+
+            case RobotWinderFlowTable robotWinder:
+                return EFlowType.RobotWinder.ToString();
 
             default:
                 return "?";

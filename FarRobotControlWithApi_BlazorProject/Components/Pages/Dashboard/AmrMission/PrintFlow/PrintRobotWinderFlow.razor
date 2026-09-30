@@ -1,0 +1,19 @@
+﻿@using FarRobotControlWithApi_BlazorProject.EFModel
+
+<div>
+    <div><b>Cell</b> : @Flow.CellName</div>
+    <div><b>Unlock Artifact</b> : @Flow.WinderUnlockArtifactId</div>
+    <div><b>Unlock Finish/Error Param</b> : @Flow.WinderUnlockFinishParam / @Flow.WinderUnlockErrorParam</div>
+    <div><b>Unlock Status/ErrorCode LiveInfo</b> : @Flow.WinderUnlock_LiveInfo_Status / @Flow.WinderUnlock_LiveInfo_ErrorCode</div>
+    <div><b>TM Robot Artifact</b> : @Flow.TmRobotArtifactId</div>
+    <div><b>TM Start/Finish/Error Param</b> : @Flow.TmRobotStartParam / @Flow.TmRobotFinishParam / @Flow.TmRobotErrorParam</div>
+    <div><b>TM Status/ErrorCode LiveInfo</b> : @Flow.TmRobot_LiveInfo_Status / @Flow.TmRobot_LiveInfo_ErrorCode</div>
+    <div><b>Lock Artifact</b> : @Flow.WinderLockArtifactId</div>
+    <div><b>Lock Finish/Error Param</b> : @Flow.WinderLockFinishParam / @Flow.WinderLockErrorParam</div>
+    <div><b>Lock Status/ErrorCode LiveInfo</b> : @Flow.WinderLock_LiveInfo_Status / @Flow.WinderLock_LiveInfo_ErrorCode</div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public RobotWinderFlowTable Flow { get; set; } = null!;
+}
