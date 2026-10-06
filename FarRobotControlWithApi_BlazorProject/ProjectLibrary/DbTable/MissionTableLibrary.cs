@@ -250,7 +250,7 @@ namespace FarRobotControlWithApi_BlazorProject.ProjectLibrary.DbTable
                 target.MissionId = data.MissionId;
                 target.AmrSerialNumber = data.AmrSerialNumber;
                 target.FlowId = data.FlowId;
-                target.TaskId = data.TaskId;
+                target.ListTaskId = data.ListTaskId;
                 target.Priority = data.Priority;
                 target.State = data.State;
                 target.StateString = data.StateString;

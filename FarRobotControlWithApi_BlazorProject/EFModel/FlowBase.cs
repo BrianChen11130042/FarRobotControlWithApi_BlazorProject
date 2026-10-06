@@ -16,8 +16,8 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
         [MaxLength(500)]
         public string? FlowId { get; set; }
 
-        [MaxLength(500)]
-        public string? TaskId { get; set; }
+        [NotMapped]
+        public List<string> ListTaskId { get; set; } = new List<string>();
 
         public int Priority { get; set; }
 

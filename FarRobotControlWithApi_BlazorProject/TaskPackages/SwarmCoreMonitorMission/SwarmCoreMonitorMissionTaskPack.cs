@@ -130,7 +130,7 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 flow.State = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.state;
                 flow.StateString = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.state_string;
                 flow.CompletePercent = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.complete_percent;
-                flow.TaskId = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.task_ids.FirstOrDefault();
+                flow.ListTaskId = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.task_ids;
 
                 if(!await _getProgressByTaskId(flow))
                 {
@@ -168,24 +168,32 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
 
         async Task<bool> _getProgressByTaskId(FlowBase flow)
         {
-            if (string.IsNullOrEmpty(flow.TaskId))
+            if (flow.ListTaskId.Count == 0)
                 return true;
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.taskProgress.taskId = flow.TaskId;
-
-            if(await IAmrControlOp.GetProgressByTaskId(amrControl))
+            foreach(string taskId in flow.ListTaskId)
             {
-                flow.StatusCode = IAmrControlPack.Packages[amrControl].property.farRobot.taskProgress.response.data.status_code;
-                flow.StatusMessage = IAmrControlPack.Packages[amrControl].property.farRobot.taskProgress.response.data.status_msg;
+                IAmrControlPack.Packages[amrControl].property.farRobot.taskProgress.taskId = taskId;
 
-                return true;
+                if (await IAmrControlOp.GetProgressByTaskId(amrControl))
+                {
+                    string state = IAmrControlPack.Packages[amrControl].property.farRobot.taskProgress.response.data.state_string;
+
+                    if (string.Equals(state, "QUEUED", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    flow.StatusCode = IAmrControlPack.Packages[amrControl].property.farRobot.taskProgress.response.data.status_code;
+                    flow.StatusMessage = IAmrControlPack.Packages[amrControl].property.farRobot.taskProgress.response.data.status_msg;
+                }
+                else
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
             }
-            else
-            {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
-            }
+
+            return true;
         }
 
         public bool IsNeedGetArtifactStatus()

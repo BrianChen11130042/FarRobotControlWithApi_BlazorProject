@@ -49,8 +49,6 @@ namespace FarRobotControlWithApi_BlazorProject.EFModel
 
                 entity.Property(e => e.StateString).HasMaxLength(500);
 
-                entity.Property(e => e.TaskId).HasMaxLength(500);
-
                 entity.Property(e => e.StatusCode).HasMaxLength(500);
 
                 entity.Property(e => e.StatusMessage).HasMaxLength(500);
