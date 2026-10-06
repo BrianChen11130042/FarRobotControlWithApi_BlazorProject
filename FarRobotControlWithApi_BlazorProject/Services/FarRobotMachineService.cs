@@ -1,10 +1,7 @@
 ﻿using CommonLibraryB.Library.AmrControl.Config;
 using CommonLibraryB.Manager.WebApiClient;
-using CommonLibraryB.Tools.LogWritter;
 using FarRobotControlWithApi_BlazorProject.DTOModel;
 using FarRobotControlWithApi_BlazorProject.EFModel;
-using FarRobotControlWithApi_BlazorProject.EquipName.AmrControl;
-using FarRobotControlWithApi_BlazorProject.ProjectLibrary.Observer.Interface;
 using FarRobotControlWithApi_BlazorProject.Scope;
 using FarRobotControlWithApi_BlazorProject.Services.Interface;
 
@@ -12,65 +9,41 @@ namespace FarRobotControlWithApi_BlazorProject.Services
 {
     public partial class FarRobotMachineService : IFarRobotMachineService
     {
-        public MachineScope scope;
+        readonly MachineScope scope;
 
         public FarRobotMachineService(MachineScope scope)
         {
             this.scope = scope;
 
-            scope.observerLibrary.AddMissionObserver(this);
-            scope.observerLibrary.AddSystemControlObserver(this);
+            scope.connectApp.dgInitialResult += InitialResult;
+
+            scope.farRobotMissionApp.dgFarRobotMissionUpdated += FarRobotMissionUpdated;
+            scope.farRobotMissionApp.dgFarRobotMissionParamUpdated += FarRobotMissionParamUpdated;
         }
     }
 
     public delegate Task dgInitResult(bool success, string msg);
 
-    public partial class FarRobotMachineService : ISystemControlObserver
+    public partial class FarRobotMachineService
     {
         public async Task<List<WebApiClientConfig>> GetWebApiClientConfig()
         {
-            List<WebApiClientConfig> list = new List<WebApiClientConfig>();
-
-            foreach(string dev in Enum.GetNames(typeof(EWebApiClient)))
-            {
-                WebApiClientConfig config = scope.webApiClientManager.Get(dev);
-
-                if(config != null)
-                {
-                    list.Add(config);
-                }
-            }
-
-            return list;
+            return await scope.connectApp.GetWebApiClientConfig();
         }
 
         public async Task SetWebApiClientConfig(WebApiClientConfig config)
         {
-            scope.webApiClientManager.Set(config.device, config);
-            scope.webApiClientManager.Save();
+            await scope.connectApp.SetWebApiClientConfig(config);
         }
 
         public async Task<List<AmrControlConfig>> GetAmrControlConfig()
         {
-            List<AmrControlConfig> list = new List<AmrControlConfig>();
-
-            foreach(string dev in Enum.GetNames(typeof(EAmrControl)))
-            {
-                AmrControlConfig config = scope.amrControlConfig.Get(dev);
-
-                if(config != null)
-                {
-                    list.Add(config);
-                }
-            }
-
-            return list;
+            return await scope.connectApp.GetAmrControlConfig();
         }
 
         public async Task SetAmrControlConfig(AmrControlConfig config)
         {
-            scope.amrControlConfig.Set(config.device, config);
-            scope.amrControlConfig.Save();
+            await scope.connectApp.SetAmrControlConfig(config);
         }
 
         public async Task Initial()
@@ -80,14 +53,9 @@ namespace FarRobotControlWithApi_BlazorProject.Services
 
         public event dgInitResult dgInitResult;
 
-        public async Task HandleInitialResult(bool success, string msg)
+        public async Task InitialResult(bool success, string msg)
         {
             dgInitResult?.Invoke(success, msg);
-        }
-
-        public async Task HandleDisconnect()
-        {
-            
         }
     }
 
@@ -96,325 +64,53 @@ namespace FarRobotControlWithApi_BlazorProject.Services
                                              Dictionary<string, List<ArtifactInformDto>> amrEmbArtifacts,
                                              List<ArtifactInformDto> extArtifacts);
 
-    public partial class FarRobotMachineService : IMissionObserver
+    public partial class FarRobotMachineService
     {
         public event dgAmrMissionUpdated dgAmrMissionUpdate;
         public event dgAmrMissionParamUpdated dgAmrMissionParamUpdate;
 
-        public async Task HandleMissionUpdated(List<AmrMissionTable> list)
+        public async Task FarRobotMissionUpdated(List<AmrMissionTable> list)
         {
             dgAmrMissionUpdate?.Invoke(list);
         }
 
-        public async Task HandleMissionParamUpdated(List<string> flowNames, List<string> cellNames, 
-                                                    Dictionary<string, List<ArtifactInformDto>> amrEmbArtifacts, 
-                                                    List<ArtifactInformDto> extArtifacts)
+        public async Task FarRobotMissionParamUpdated(List<string> flowNames, List<string> cellNames, 
+                                                      Dictionary<string, List<ArtifactInformDto>> amrEmbArtifacts, 
+                                                      List<ArtifactInformDto> extArtifacts)
         {
             dgAmrMissionParamUpdate?.Invoke(flowNames, cellNames, amrEmbArtifacts, extArtifacts);
         }
 
         public async Task<List<AmrMissionTable>> GetAmrMissionInQueue()
         {
-            return scope.missionTableLibrary.listAmrMissionInQueue;
+            return await scope.farRobotMissionApp.GetAmrMissionInQueue();
         }
 
         public async Task<(List<string> flowNames, List<string> cellNames, 
-                           Dictionary<string, List<ArtifactInformDto>> amrEmbArtifacts, List<ArtifactInformDto> extArtifacts)> GetAmrMissionParam()
+                           Dictionary<string, List<ArtifactInformDto>> amrEmbArtifacts, 
+                           List<ArtifactInformDto> extArtifacts)> GetAmrMissionParam()
         {
-            List<string> flows = scope.initialDataLibrary.ListFlowName;
-            List<string> cells = scope.initialDataLibrary.ListCellName;
-            Dictionary<string, List<ArtifactInformDto>> amrEmbs = scope.initialDataLibrary.DcAmrWithEmbArtifact;
-            List<ArtifactInformDto> exts = scope.initialDataLibrary.ListExtArtifact;
-
-            return (flows, cells, amrEmbs, exts);
+            return await scope.farRobotMissionApp.GetAmrMissionParam();
         }
 
         public async Task<bool> SetMission(AmrMissionTable mission)
         {
-            var result = await scope.missionTableLibrary.UpsertMissionTable(mission);
-
-            if(result.status)
-            {
-                return result.status;
-            }
-            else
-            {
-                await scope.observerLibrary.NotifyNLog(EStatus.Error, result.msg);
-                return result.status;
-            }
+            return await scope.farRobotMissionApp.SetMission(mission);
         }
 
         public async Task<bool> CancelMission(Guid missionId)
         {
-
-            AmrMissionTable? mission = scope.missionTableLibrary.listAmrMissionInQueue.FirstOrDefault(x => x.Id == missionId
-                                                                                                        && x.IsFinish == false
-                                                                                                        && x.IsCancel == false
-                                                                                                        && (string.Equals(x.MissionState,
-                                                                                                                          EMissionState.FAILED.ToString(),
-                                                                                                                          StringComparison.OrdinalIgnoreCase) ||
-                                                                                                            string.Equals(x.MissionState,
-                                                                                                                          EMissionState.RUNNING.ToString(),
-                                                                                                                          StringComparison.OrdinalIgnoreCase) ||
-                                                                                                            string.Equals(x.MissionState,
-                                                                                                                          EMissionState.DISPATCH_REQUEST.ToString(),
-                                                                                                                          StringComparison.OrdinalIgnoreCase)));
-
-            if(mission == null)
-            {
-                await scope.observerLibrary.NotifyNLog(EStatus.Error, "Mission not found in queue");
-                return false;
-            }
-
-            mission.MissionState = EMissionState.CANCEL_REQUEST.ToString();
-
-            if (!await SetMission(mission))
-            {
-                return false;
-            }
-
-            return true;
+            return await scope.farRobotMissionApp.CancelMission(missionId);
         }
 
         public async Task<bool> RetryMission(Guid missionId)
         {
-            AmrMissionTable? mission = scope.missionTableLibrary.listAmrMissionInQueue.FirstOrDefault(x => x.Id == missionId
-                                                                                                        && x.IsFinish == false
-                                                                                                        && x.IsCancel == false
-                                                                                                        && x.Flows.Any(f => f.IsError && !f.IsFinish && !f.IsCancel)
-                                                                                                        && string.Equals(x.MissionState,
-                                                                                                                         EMissionState.FAILED.ToString(),
-                                                                                                                         StringComparison.OrdinalIgnoreCase));
-
-            if (mission == null)
-            {
-                await scope.observerLibrary.NotifyNLog(EStatus.Error, "Mission not found in queue");
-                return false;
-            }
-
-            List<FlowBase> listFailFlow = mission.Flows.Where(f => f.IsError && !f.IsFinish && !f.IsCancel)
-                                                       .OrderBy(f => f.EstablishTime)
-                                                       .ToList();
-
-            List<FlowBase> listRetryFlow = _getListRetryFlow(listFailFlow);
-
-            if(!await _setListRetryFlow(listRetryFlow))
-            {
-                return false;
-            }
-
-            mission.FlowCount = mission.FlowCount + listRetryFlow.Count;
-            mission.MissionState = EMissionState.RETRY_REQUEST.ToString();
-
-            if(!await SetMission(mission))
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        List<FlowBase> _getListRetryFlow(List<FlowBase> listFailFlow)
-        {
-            DateTime now = DateTime.Now;
-            List<FlowBase> listRetryFlow = new List<FlowBase>();
-
-            foreach(FlowBase failFlow in listFailFlow)
-            {
-                now = now.AddMilliseconds(1);
-
-                switch (failFlow)
-                {
-                    case MoveFlowTable move:
-
-                        listRetryFlow.Add(new MoveFlowTable()
-                        {
-                            Id = Guid.NewGuid(),
-                            MissionId = move.MissionId,
-                            AmrSerialNumber = move.AmrSerialNumber,
-                            Priority = 5,
-                            EstablishTime = now,
-                            CellName = move.CellName
-                        });
-
-                        break;
-
-                    case ChargeFlowTable charge:
-
-                        listRetryFlow.Add(new ChargeFlowTable()
-                        {
-                            Id = Guid.NewGuid(),
-                            MissionId = charge.MissionId,
-                            AmrSerialNumber = charge.AmrSerialNumber,
-                            Priority = 5,
-                            EstablishTime = now,
-                            CellName = charge.CellName,
-                            Percentage = charge.Percentage
-                        });
-
-                        break;
-
-                    case MoveArtifactFlowTable moveArtifact:
-
-                        listRetryFlow.Add(new MoveArtifactFlowTable()
-                        {
-                            Id = Guid.NewGuid(),
-                            MissionId = moveArtifact.MissionId,
-                            AmrSerialNumber = moveArtifact.AmrSerialNumber,
-                            Priority = 5,
-                            EstablishTime = now,
-                            CellName = moveArtifact.CellName,
-                            EmbArtifactId = moveArtifact.EmbArtifactId,
-                            StartParam = moveArtifact.StartParam,
-                            FinishParam = moveArtifact.FinishParam,
-                            ErrorParam = moveArtifact.ErrorParam
-                        });
-
-                        break;
-
-                    case MoveArtifactsFlowTable moveArtifacts:
-
-                        listRetryFlow.Add(new MoveArtifactsFlowTable()
-                        {
-                            Id = Guid.NewGuid(),
-                            MissionId = moveArtifacts.MissionId,
-                            AmrSerialNumber= moveArtifacts.AmrSerialNumber,
-                            Priority = 5,
-                            EstablishTime = now,
-                            CellName = moveArtifacts.CellName,
-                            EmbArtifactId= moveArtifacts.EmbArtifactId,
-                            EmbStartParam = moveArtifacts.EmbStartParam,
-                            EmbFinishParam = moveArtifacts.EmbFinishParam,
-                            EmbErrorParam = moveArtifacts.EmbErrorParam,
-                            ExtArtifactId = moveArtifacts.ExtArtifactId,
-                            ExtStartParam = moveArtifacts.ExtStartParam,
-                            ExtFinishParam = moveArtifacts.ExtFinishParam,
-                            ExtErrorParam = moveArtifacts.ExtErrorParam,
-                        });
-
-                        break;
-
-                    case RobotWinderFlowTable robotWinder:
-
-                        listRetryFlow.Add(new RobotWinderFlowTable() 
-                        {
-                            Id = Guid.NewGuid(),
-                            MissionId = robotWinder.MissionId,
-                            AmrSerialNumber = robotWinder.AmrSerialNumber,
-                            Priority = 5,
-                            EstablishTime = now,
-                            CellName = robotWinder.CellName,
-                            WinderUnlockArtifactId = robotWinder.WinderUnlockArtifactId,
-                            WinderUnlockFinishParam = robotWinder.WinderUnlockFinishParam,
-                            WinderUnlockErrorParam = robotWinder.WinderUnlockErrorParam,
-                            TmRobotArtifactId = robotWinder.TmRobotArtifactId,
-                            TmRobotStartParam = robotWinder.TmRobotStartParam,
-                            TmRobotFinishParam = robotWinder.TmRobotFinishParam,
-                            TmRobotErrorParam = robotWinder.TmRobotErrorParam,
-                            WinderLockArtifactId = robotWinder.WinderLockArtifactId,
-                            WinderLockFinishParam = robotWinder.WinderLockFinishParam,
-                            WinderLockErrorParam = robotWinder.WinderLockErrorParam
-                        });
-
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            return listRetryFlow;
-        }
-
-        async Task<bool> _setListRetryFlow(IEnumerable<FlowBase> listRetryFlow)
-        {
-            foreach (FlowBase flow in listRetryFlow)
-            {
-                switch (flow)
-                {
-                    case MoveFlowTable move:
-
-                        var moveResult = await scope.missionTableLibrary.UpsertFlow(move);
-
-                        if (!moveResult.status)
-                        {
-                            await scope.observerLibrary.NotifyNLog(EStatus.Error, moveResult.msg);
-                            return moveResult.status;
-                        }
-                        break;
-                    case ChargeFlowTable charge:
-
-                        var chargeResult = await scope.missionTableLibrary.UpsertFlow(charge);
-
-                        if (!chargeResult.status)
-                        {
-                            await scope.observerLibrary.NotifyNLog(EStatus.Error, chargeResult.msg);
-                            return chargeResult.status;
-                        }
-                        break;
-
-                    case MoveArtifactFlowTable moveArtifact:
-
-                        var moveArtifactResult = await scope.missionTableLibrary.UpsertFlow(moveArtifact);
-
-                        if (!moveArtifactResult.status)
-                        {
-                            await scope.observerLibrary.NotifyNLog(EStatus.Error, moveArtifactResult.msg);
-                            return moveArtifactResult.status;
-                        }
-                        break;
-
-                    case MoveArtifactsFlowTable moveArtifacts:
-
-                        var moveArtifactsResult = await scope.missionTableLibrary.UpsertFlow(moveArtifacts);
-
-                        if (!moveArtifactsResult.status)
-                        {
-                            await scope.observerLibrary.NotifyNLog(EStatus.Error, moveArtifactsResult.msg);
-                            return moveArtifactsResult.status;
-                        }
-                        break;
-
-                    case RobotWinderFlowTable robotWinder:
-
-                        var robotWinderResult = await scope.missionTableLibrary.UpsertFlow(robotWinder);
-
-                        if(!robotWinderResult.status)
-                        {
-                            await scope.observerLibrary.NotifyNLog(EStatus.Error, robotWinderResult.msg);
-                            return robotWinderResult.status;
-                        }
-                        break;
-                }
-            }
-
-            return true;
+            return await scope.farRobotMissionApp.RetryMission(missionId);
         }
 
         public async Task<bool> ContinueMission(Guid missionId)
         {
-            AmrMissionTable? mission = scope.missionTableLibrary.listAmrMissionInQueue.FirstOrDefault(x => x.Id == missionId
-                                                                                                        && x.IsFinish == false
-                                                                                                        && x.IsCancel == false
-                                                                                                        && string.Equals(x.MissionState, 
-                                                                                                                         EMissionState.FAILED.ToString(),
-                                                                                                                         StringComparison.OrdinalIgnoreCase)
-                                                                                                        && x.Flows.Any(f => f.IsStart && f.IsError && !f.IsFinish && !f.IsCancel));
-
-            if (mission == null)
-            {
-                await scope.observerLibrary.NotifyNLog(EStatus.Error, "Mission not found in queue");
-                return false;
-            }
-
-            mission.MissionState = EMissionState.CONTINUE_REQUEST.ToString();
-
-            if (!await SetMission(mission))
-            {
-                return false;
-            }
-
-            return true;
+            return await scope.farRobotMissionApp.ContinueMission(missionId);
         }
     }
 }

@@ -16,6 +16,7 @@
             _createProjectLibrary();
             _createManager();
             _createAmrControl();
+            _createApplication();
         }
 
         public void initAll()
@@ -31,6 +32,9 @@
             _initMonitorMissionTask();
             _initRegularTask();
             _initThreadTask();
+
+            _initApplication();
+
             _initThread();
         }
     }
