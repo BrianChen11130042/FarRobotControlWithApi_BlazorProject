@@ -54,19 +54,28 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreRegular
 
         public async Task<bool> GetAccessToken()
         {
-            if(await IAmrControlOp.GetAccessToken(amrControl))
-            {
-                IDataLib.TokenInform.accessToken = IAmrControlPack.Packages[amrControl].property.farRobot.accessToken.response.access_token;
-                IDataLib.TokenInform.tokenType = IAmrControlPack.Packages[amrControl].property.farRobot.accessToken.response.token_type;
-                IDataLib.TokenInform.retrieveTime = DateTime.Now;
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-                return true;
-            }
-            else
+            try
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
+                if (await IAmrControlOp.GetAccessToken(amrControl))
+                {
+                    IDataLib.TokenInform.accessToken = IAmrControlPack.Packages[amrControl].property.farRobot.accessToken.response.access_token;
+                    IDataLib.TokenInform.tokenType = IAmrControlPack.Packages[amrControl].property.farRobot.accessToken.response.token_type;
+                    IDataLib.TokenInform.retrieveTime = DateTime.Now;
+
+                    return true;
+                }
+                else
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
+            }
+            finally
+            {
+                IAmrControlPack.Packages[amrControl].gate.Release();
             }
         }
 

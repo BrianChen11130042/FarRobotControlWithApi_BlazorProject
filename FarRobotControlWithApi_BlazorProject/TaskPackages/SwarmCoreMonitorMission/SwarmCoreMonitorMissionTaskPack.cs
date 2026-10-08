@@ -123,40 +123,49 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
             if (string.IsNullOrEmpty(flow.FlowId) || flow.IsFinish || flow.IsCancel || flow.IsError)
                 return true;
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.flowId = flow.FlowId;
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-            if (await IAmrControlOp.GetProgressByFlowId(amrControl))
+            try
             {
-                flow.State = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.state;
-                flow.StateString = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.state_string;
-                flow.CompletePercent = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.complete_percent;
-                flow.ListTaskId = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.task_ids;
+                IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.flowId = flow.FlowId;
 
-                if(!await _getProgressByTaskId(flow))
+                if (await IAmrControlOp.GetProgressByFlowId(amrControl))
                 {
-                    return false;
-                }
+                    flow.State = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.state;
+                    flow.StateString = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.state_string;
+                    flow.CompletePercent = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.complete_percent;
+                    flow.ListTaskId = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.task_ids.ToList();
 
-                if (string.Equals(flow.StateString, "COMPLETED", StringComparison.OrdinalIgnoreCase))
-                {
-                    string updateTime = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.updated_timestring;
-                    flow.FinishTime = DateTimeOffset.Parse(updateTime).DateTime;
-                }
+                    if (!await _getProgressByTaskId(flow))
+                    {
+                        return false;
+                    }
 
-                return true;
-            }
-            else
-            {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    if (string.Equals(flow.StateString, "COMPLETED", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string updateTime = IAmrControlPack.Packages[amrControl].property.farRobot.flowProgress.response.data.updated_timestring;
+                        flow.FinishTime = DateTimeOffset.Parse(updateTime).DateTime;
+                    }
 
-                if(_isFlowNotFound(nlog))
-                {
-                    await IDataLib.WriteNLogError(nlog);
                     return true;
                 }
+                else
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
 
-                await IDataLib.WriteNLogError(nlog);
-                return false;
+                    if (_isFlowNotFound(nlog))
+                    {
+                        await IDataLib.WriteNLogError(nlog);
+                        return true;
+                    }
+
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
+            }
+            finally
+            {
+                IAmrControlPack.Packages[amrControl].gate.Release();
             }
         }
 
@@ -260,41 +269,54 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 || string.Equals(moveArtifact.StateString, "QUEUED", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = moveArtifact.EmbArtifactId;
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-            if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+            try
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
-            }
+                #region emb
 
-            var response = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
-            bool isRunning = response.service != null
-                             && response.service.TryGetValue("apiservice", out var apiService)
-                             && string.Equals(apiService?.response?.status, "running",StringComparison.OrdinalIgnoreCase);
+                IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = moveArtifact.EmbArtifactId;
 
-            bool readLiveInfo = isRunning || moveArtifact.EmbWasRunning;
-
-            if (readLiveInfo)
-            {
-                Dictionary<string, JsonElement> liveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
-                                                                      .artifactStatusByArtifactId.response.state.live_info;
-
-                if (liveInfo.TryGetValue("status", out var status))
+                if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
                 {
-                    moveArtifact.LiveInfo_Status = status.ToString();
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
                 }
 
-                if (liveInfo.TryGetValue("errorcode", out var errorCode))
+                var response = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+                bool isRunning = response.service != null
+                                 && response.service.TryGetValue("apiservice", out var apiService)
+                                 && string.Equals(apiService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+
+                bool readLiveInfo = isRunning || moveArtifact.EmbWasRunning;
+
+                if (readLiveInfo)
                 {
-                    moveArtifact.LiveInfo_ErrorCode = errorCode.ToString();
+                    Dictionary<string, JsonElement> liveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                                          .artifactStatusByArtifactId.response.state.live_info;
+
+                    if (liveInfo.TryGetValue("status", out var status))
+                    {
+                        moveArtifact.LiveInfo_Status = status.ToString();
+                    }
+
+                    if (liveInfo.TryGetValue("errorcode", out var errorCode))
+                    {
+                        moveArtifact.LiveInfo_ErrorCode = errorCode.ToString();
+                    }
                 }
+
+                moveArtifact.EmbWasRunning = isRunning;
+
+                #endregion
+
+                return true;
             }
-
-            moveArtifact.EmbWasRunning = isRunning;
-
-            return true;
+            finally
+            {
+                IAmrControlPack.Packages[amrControl].gate.Release();
+            }
         }
 
         async Task<bool> _getArtifactsByMoveArtifactsFlow(MoveArtifactsFlowTable moveArtifacts)
@@ -305,77 +327,92 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 || string.Equals(moveArtifacts.StateString, "QUEUED", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            //emb
-            IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = moveArtifacts.EmbArtifactId;
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-            if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+            try
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
-            }
+                #region emb
 
-            var embResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
-            bool isEmbRunning = embResponse.service != null
-                                && embResponse.service.TryGetValue("apiservice", out var apiService)
-                                && string.Equals(apiService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+                IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = moveArtifacts.EmbArtifactId;
 
-            bool readEmbLiveInfo = isEmbRunning || moveArtifacts.EmbWasRunning;
-
-            if (readEmbLiveInfo)
-            {
-                Dictionary<string, JsonElement> embLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
-                                                                         .artifactStatusByArtifactId.response.state.live_info;
-
-                if (embLiveInfo.TryGetValue("status", out var embStatus))
+                if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
                 {
-                    moveArtifacts.Emb_LiveInfo_Status = embStatus.ToString();
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
                 }
 
-                if (embLiveInfo.TryGetValue("errorcode", out var embErrorCode))
+                var embResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+                bool isEmbRunning = embResponse.service != null
+                                    && embResponse.service.TryGetValue("apiservice", out var apiService)
+                                    && string.Equals(apiService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+
+                bool readEmbLiveInfo = isEmbRunning || moveArtifacts.EmbWasRunning;
+
+                if (readEmbLiveInfo)
                 {
-                    moveArtifacts.Emb_LiveInfo_ErrorCode = embErrorCode.ToString();
+                    Dictionary<string, JsonElement> embLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                                             .artifactStatusByArtifactId.response.state.live_info;
+
+                    if (embLiveInfo.TryGetValue("status", out var embStatus))
+                    {
+                        moveArtifacts.Emb_LiveInfo_Status = embStatus.ToString();
+                    }
+
+                    if (embLiveInfo.TryGetValue("errorcode", out var embErrorCode))
+                    {
+                        moveArtifacts.Emb_LiveInfo_ErrorCode = embErrorCode.ToString();
+                    }
                 }
+
+                moveArtifacts.EmbWasRunning = isEmbRunning;
+
+                #endregion
+
+                #region ext
+
+                IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = moveArtifacts.ExtArtifactId;
+
+                if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
+
+                var extResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+                bool isExtRunning = extResponse.service != null
+                                    && extResponse.service.TryGetValue("extservice1", out var extservice1)
+                                    && string.Equals(extservice1?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+
+                bool readExtLiveInfo = isExtRunning || moveArtifacts.ExtWasRunning;
+
+                if (readExtLiveInfo)
+                {
+                    Dictionary<string, JsonElement> extLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                                             .artifactStatusByArtifactId.response.state.live_info;
+
+                    if (extLiveInfo.TryGetValue("extstatus", out var extStatus))
+                    {
+                        moveArtifacts.Ext_LiveInfo_Status = extStatus.ToString();
+                    }
+
+                    if (extLiveInfo.TryGetValue("exterrorcode", out var extErrorCode))
+                    {
+                        moveArtifacts.Ext_LiveInfo_ErrorCode = extErrorCode.ToString();
+                    }
+                }
+
+                moveArtifacts.ExtWasRunning = isExtRunning;
+
+                #endregion
+
+                return true;
             }
-
-            moveArtifacts.EmbWasRunning = isEmbRunning;
-
-            //ext
-            IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = moveArtifacts.ExtArtifactId;
-
-            if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+            finally
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
+                IAmrControlPack.Packages[amrControl].gate.Release();
             }
-
-            var extResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
-            bool isExtRunning = extResponse.service != null
-                                && extResponse.service.TryGetValue("extservice1", out var extservice1)
-                                && string.Equals(extservice1?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
-
-            bool readExtLiveInfo = isExtRunning || moveArtifacts.ExtWasRunning;
-
-            if (readExtLiveInfo)
-            {
-                Dictionary<string, JsonElement> extLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
-                                                                         .artifactStatusByArtifactId.response.state.live_info;
-
-                if (extLiveInfo.TryGetValue("extstatus", out var extStatus))
-                {
-                    moveArtifacts.Ext_LiveInfo_Status = extStatus.ToString();
-                }
-
-                if (extLiveInfo.TryGetValue("exterrorcode", out var extErrorCode))
-                {
-                    moveArtifacts.Ext_LiveInfo_ErrorCode = extErrorCode.ToString();
-                }
-            }
-
-            moveArtifacts.ExtWasRunning = isExtRunning;
-
-            return true;
         }
 
         async Task<bool> _getArtifactsByRobotWinderFlow(RobotWinderFlowTable robotWinder)
@@ -387,114 +424,130 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreMonitorMiss
                 || string.Equals(robotWinder.StateString, "QUEUED", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            //winder unlock
-            IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = robotWinder.WinderUnlockArtifactId;
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-            if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+            try
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
-            }
+                #region unlock winder
 
-            var unlockResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
-            bool isUnlockRunning = unlockResponse.service != null
-                                && unlockResponse.service.TryGetValue("winderunlockservice", out var unlockService)
-                                && string.Equals(unlockService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+                IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = robotWinder.WinderUnlockArtifactId;
 
-            bool readUnlockLiveInfo = isUnlockRunning || robotWinder.WinderUnlockWasRunning;
-
-            if (readUnlockLiveInfo)
-            {
-                Dictionary<string, JsonElement> extLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
-                                                                             .artifactStatusByArtifactId.response.state.live_info;
-
-                if (extLiveInfo.TryGetValue("winderunlockstatus", out var unlockStatus))
+                if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
                 {
-                    robotWinder.WinderUnlock_LiveInfo_Status = unlockStatus.ToString();
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
                 }
 
-                if (extLiveInfo.TryGetValue("winderunlockerror", out var unlockErrorCode))
+                var unlockResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+                bool isUnlockRunning = unlockResponse.service != null
+                                    && unlockResponse.service.TryGetValue("winderunlockservice", out var unlockService)
+                                    && string.Equals(unlockService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+
+                bool readUnlockLiveInfo = isUnlockRunning || robotWinder.WinderUnlockWasRunning;
+
+                if (readUnlockLiveInfo)
                 {
-                    robotWinder.WinderUnlock_LiveInfo_ErrorCode = unlockErrorCode.ToString();
+                    Dictionary<string, JsonElement> extLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                                                 .artifactStatusByArtifactId.response.state.live_info;
+
+                    if (extLiveInfo.TryGetValue("winderunlockstatus", out var unlockStatus))
+                    {
+                        robotWinder.WinderUnlock_LiveInfo_Status = unlockStatus.ToString();
+                    }
+
+                    if (extLiveInfo.TryGetValue("winderunlockerror", out var unlockErrorCode))
+                    {
+                        robotWinder.WinderUnlock_LiveInfo_ErrorCode = unlockErrorCode.ToString();
+                    }
                 }
+
+                robotWinder.WinderUnlockWasRunning = isUnlockRunning;
+
+                #endregion
+
+                #region tm robot
+
+                IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = robotWinder.TmRobotArtifactId;
+
+                if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
+
+                var RobotResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+                bool isRobotRunning = RobotResponse.service != null
+                                    && RobotResponse.service.TryGetValue("tmrobotservice", out var RobotService)
+                                    && string.Equals(RobotService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+
+                bool readRobotLiveInfo = isRobotRunning || robotWinder.TmRobotWasRunning;
+
+                if (readRobotLiveInfo)
+                {
+                    Dictionary<string, JsonElement> embLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                                                 .artifactStatusByArtifactId.response.state.live_info;
+
+                    if (embLiveInfo.TryGetValue("liveinforobotstatus", out var RobotStatus))
+                    {
+                        robotWinder.TmRobot_LiveInfo_Status = RobotStatus.ToString();
+                    }
+
+                    if (embLiveInfo.TryGetValue("liveinforoboterrorcode", out var RobotErrorCode))
+                    {
+                        robotWinder.TmRobot_LiveInfo_ErrorCode = RobotErrorCode.ToString();
+                    }
+                }
+
+                robotWinder.TmRobotWasRunning = isRobotRunning;
+
+                #endregion
+
+                #region lock winder
+
+                IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = robotWinder.WinderLockArtifactId;
+
+                if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
+
+                var lockResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
+                bool isLockRunning = lockResponse.service != null
+                                    && lockResponse.service.TryGetValue("winderlockservice", out var lockService)
+                                    && string.Equals(lockService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
+
+                bool readlockLiveInfo = isLockRunning || robotWinder.WinderLockWasRunning;
+
+                if (readlockLiveInfo)
+                {
+                    Dictionary<string, JsonElement> extLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
+                                                                                 .artifactStatusByArtifactId.response.state.live_info;
+
+                    if (extLiveInfo.TryGetValue("winderlockstatus", out var LockStatus))
+                    {
+                        robotWinder.WinderLock_LiveInfo_Status = LockStatus.ToString();
+                    }
+
+                    if (extLiveInfo.TryGetValue("winderlockerror", out var LockErrorCode))
+                    {
+                        robotWinder.WinderLock_LiveInfo_ErrorCode = LockErrorCode.ToString();
+                    }
+                }
+
+                robotWinder.WinderLockWasRunning = isLockRunning;
+
+                #endregion
+
+                return true;
             }
-
-            robotWinder.WinderUnlockWasRunning = isUnlockRunning;
-
-            //Tm Robot
-            IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = robotWinder.TmRobotArtifactId;
-
-            if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
+            finally
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
+                IAmrControlPack.Packages[amrControl].gate.Release();
             }
-
-            var RobotResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
-            bool isRobotRunning = RobotResponse.service != null
-                                && RobotResponse.service.TryGetValue("tmrobotservice", out var RobotService)
-                                && string.Equals(RobotService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
-
-            bool readRobotLiveInfo = isRobotRunning || robotWinder.TmRobotWasRunning;
-
-            if (readRobotLiveInfo)
-            {
-                Dictionary<string, JsonElement> embLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
-                                                                             .artifactStatusByArtifactId.response.state.live_info;
-
-                if (embLiveInfo.TryGetValue("liveinforobotstatus", out var RobotStatus))
-                {
-                    robotWinder.TmRobot_LiveInfo_Status = RobotStatus.ToString();
-                }
-
-                if (embLiveInfo.TryGetValue("liveinforoboterrorcode", out var RobotErrorCode))
-                {
-                    robotWinder.TmRobot_LiveInfo_ErrorCode = RobotErrorCode.ToString();
-                }
-            }
-
-            robotWinder.TmRobotWasRunning = isRobotRunning;
-
-
-            //winder lock
-            IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.artifactId = robotWinder.WinderLockArtifactId;
-
-            if (!await IAmrControlOp.GetArtifactStatusByArtifactId(amrControl))
-            {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
-            }
-
-            var lockResponse = IAmrControlPack.Packages[amrControl].property.farRobot.artifactStatusByArtifactId.response;
-            bool isLockRunning = lockResponse.service != null
-                                && lockResponse.service.TryGetValue("winderlockservice", out var lockService)
-                                && string.Equals(lockService?.response?.status, "running", StringComparison.OrdinalIgnoreCase);
-
-            bool readlockLiveInfo = isLockRunning || robotWinder.WinderLockWasRunning;
-
-            if (readlockLiveInfo)
-            {
-                Dictionary<string, JsonElement> extLiveInfo = IAmrControlPack.Packages[amrControl].property.farRobot
-                                                                             .artifactStatusByArtifactId.response.state.live_info;
-
-                if (extLiveInfo.TryGetValue("winderlockstatus", out var LockStatus))
-                {
-                    robotWinder.WinderLock_LiveInfo_Status = LockStatus.ToString();
-                }
-
-                if (extLiveInfo.TryGetValue("winderlockerror", out var LockErrorCode))
-                {
-                    robotWinder.WinderLock_LiveInfo_ErrorCode = LockErrorCode.ToString();
-                }
-            }
-
-            robotWinder.WinderLockWasRunning = isLockRunning;
-
-
-            return true;
         }
 
         public async Task<bool> UpsertMissionTable()

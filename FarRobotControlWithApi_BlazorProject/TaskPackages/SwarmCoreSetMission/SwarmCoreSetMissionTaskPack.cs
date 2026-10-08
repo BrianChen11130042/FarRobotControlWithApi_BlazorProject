@@ -165,21 +165,30 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             if (moveFlow.IsStart == true)
                 return true;
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveFlow.post.args.priority = moveFlow.Priority.ToString();
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveFlow.post.args.Params.Node4.assigned_robot = moveFlow.AmrSerialNumber;
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveFlow.post.args.Params.Node4.goal_tynXx = moveFlow.CellName;
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-            if (await IAmrControlOp.SetMoveFlow(amrControl))
+            try
             {
-                moveFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.moveFlow.response.swarm_data.flow_id;
-                moveFlow.StartTime = DateTime.Now;
-                return true;
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveFlow.post.args.priority = moveFlow.Priority.ToString();
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveFlow.post.args.Params.Node4.assigned_robot = moveFlow.AmrSerialNumber;
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveFlow.post.args.Params.Node4.goal_tynXx = moveFlow.CellName;
+
+                if (await IAmrControlOp.SetMoveFlow(amrControl))
+                {
+                    moveFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.moveFlow.response.swarm_data.flow_id;
+                    moveFlow.StartTime = DateTime.Now;
+                    return true;
+                }
+                else
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
             }
-            else
+            finally
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
+                IAmrControlPack.Packages[amrControl].gate.Release();
             }
         }
 
@@ -188,22 +197,31 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             if (chargeFlow.IsStart == true)
                 return true;
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.post.args.priority = chargeFlow.Priority.ToString();
-            IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.post.args.Params.Node4.assigned_robot = chargeFlow.AmrSerialNumber;
-            IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.post.args.Params.Node4.goal_nUvaT = chargeFlow.CellName;
-            IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.post.args.Params.Node4.percentage_nUvaT = chargeFlow.Percentage.ToString();
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-            if (await IAmrControlOp.SetChargeFlow(amrControl))
+            try
             {
-                chargeFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.response.swarm_data.flow_id;
-                chargeFlow.StartTime = DateTime.Now;
-                return true;
+                IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.post.args.priority = chargeFlow.Priority.ToString();
+                IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.post.args.Params.Node4.assigned_robot = chargeFlow.AmrSerialNumber;
+                IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.post.args.Params.Node4.goal_nUvaT = chargeFlow.CellName;
+                IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.post.args.Params.Node4.percentage_nUvaT = chargeFlow.Percentage.ToString();
+
+                if (await IAmrControlOp.SetChargeFlow(amrControl))
+                {
+                    chargeFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.chargeFlow.response.swarm_data.flow_id;
+                    chargeFlow.StartTime = DateTime.Now;
+                    return true;
+                }
+                else
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
             }
-            else
+            finally
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
+                IAmrControlPack.Packages[amrControl].gate.Release();
             }
         }
 
@@ -212,24 +230,33 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             if (moveArtifactFlow.IsStart == true)
                 return true;
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.post.args.priority = moveArtifactFlow.Priority.ToString();
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.post.args.Params.Node5.assigned_robot = moveArtifactFlow.AmrSerialNumber;
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.post.args.Params.Node5.goal_dxlVB = moveArtifactFlow.CellName;
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.post.args.Params.Node5.artifact_id_0i3II = moveArtifactFlow.EmbArtifactId;
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.post.args.Params.Node5.value_0i3II =
-                $"startparam:{moveArtifactFlow.StartParam},finishstatusparam:{moveArtifactFlow.FinishParam},errorstatusparam:{moveArtifactFlow.ErrorParam}";
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-            if (await IAmrControlOp.SetMoveArtifactFlow(amrControl))
+            try
             {
-                moveArtifactFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.response.swarm_data.flow_id;
-                moveArtifactFlow.StartTime = DateTime.Now;
-                return true;
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.post.args.priority = moveArtifactFlow.Priority.ToString();
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.post.args.Params.Node5.assigned_robot = moveArtifactFlow.AmrSerialNumber;
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.post.args.Params.Node5.goal_dxlVB = moveArtifactFlow.CellName;
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.post.args.Params.Node5.artifact_id_0i3II = moveArtifactFlow.EmbArtifactId;
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.post.args.Params.Node5.value_0i3II =
+                    $"startparam:{moveArtifactFlow.StartParam},finishstatusparam:{moveArtifactFlow.FinishParam},errorstatusparam:{moveArtifactFlow.ErrorParam}";
+
+                if (await IAmrControlOp.SetMoveArtifactFlow(amrControl))
+                {
+                    moveArtifactFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactFlow.response.swarm_data.flow_id;
+                    moveArtifactFlow.StartTime = DateTime.Now;
+                    return true;
+                }
+                else
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
             }
-            else
+            finally
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
+                IAmrControlPack.Packages[amrControl].gate.Release();
             }
         }
 
@@ -238,29 +265,38 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             if (moveArtifactsFlow.IsStart == true)
                 return true;
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.priority = moveArtifactsFlow.Priority.ToString();
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.assigned_robot = moveArtifactsFlow.AmrSerialNumber;
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.goal_MeSfB = moveArtifactsFlow.CellName;
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.artifact_id_cfjoZ = moveArtifactsFlow.EmbArtifactId;
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.value_cfjoZ =
-                 $"startparam:{moveArtifactsFlow.EmbStartParam},finishstatusparam:{moveArtifactsFlow.EmbFinishParam},errorstatusparam:{moveArtifactsFlow.EmbErrorParam}";
-
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.artifact_id_VsQoQ = moveArtifactsFlow.ExtArtifactId;
-            IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.value_VsQoQ =
-                 $"extstartparam:{moveArtifactsFlow.ExtStartParam},extfinishparam:{moveArtifactsFlow.ExtFinishParam},exterrorparam:{moveArtifactsFlow.ExtErrorParam}";
-
-            if(await IAmrControlOp.SetMoveArtifactsFlow(amrControl))
+            try
             {
-                moveArtifactsFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.response.swarm_data.flow_id;
-                moveArtifactsFlow.StartTime = DateTime.Now;
-                return true;
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.priority = moveArtifactsFlow.Priority.ToString();
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.assigned_robot = moveArtifactsFlow.AmrSerialNumber;
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.goal_MeSfB = moveArtifactsFlow.CellName;
+
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.artifact_id_cfjoZ = moveArtifactsFlow.EmbArtifactId;
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.value_cfjoZ =
+                     $"startparam:{moveArtifactsFlow.EmbStartParam},finishstatusparam:{moveArtifactsFlow.EmbFinishParam},errorstatusparam:{moveArtifactsFlow.EmbErrorParam}";
+
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.artifact_id_VsQoQ = moveArtifactsFlow.ExtArtifactId;
+                IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.post.args.Params.Node4.value_VsQoQ =
+                     $"extstartparam:{moveArtifactsFlow.ExtStartParam},extfinishparam:{moveArtifactsFlow.ExtFinishParam},exterrorparam:{moveArtifactsFlow.ExtErrorParam}";
+
+                if (await IAmrControlOp.SetMoveArtifactsFlow(amrControl))
+                {
+                    moveArtifactsFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.moveArtifactsFlow.response.swarm_data.flow_id;
+                    moveArtifactsFlow.StartTime = DateTime.Now;
+                    return true;
+                }
+                else
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
             }
-            else
+            finally
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
+                IAmrControlPack.Packages[amrControl].gate.Release();
             }
         }
 
@@ -269,36 +305,44 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             if (robotWinderFlow.IsStart == true)
                 return true;
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.priority = robotWinderFlow.Priority.ToString();
-            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.assigned_robot = robotWinderFlow.AmrSerialNumber;
-            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.goal_Oy8t1 = robotWinderFlow.CellName;
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.artifact_id_aBJDC = robotWinderFlow.WinderUnlockArtifactId;
-            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.value_aBJDC =
-                $"setunlockfinish:{robotWinderFlow.WinderUnlockFinishParam},setunlockerror:{robotWinderFlow.WinderUnlockErrorParam}";
-
-            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.artifact_id_hdN6Z = robotWinderFlow.TmRobotArtifactId;
-            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.value_hdN6Z =
-                $"setrobotstarttype:{robotWinderFlow.TmRobotStartParam},setrobotfinish:{robotWinderFlow.TmRobotFinishParam},setroboterror:{robotWinderFlow.TmRobotErrorParam}";
-
-            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.artifact_id_6zfN9 = robotWinderFlow.WinderLockArtifactId;
-            IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.value_6zfN9 =
-                $"setlockfinish:{robotWinderFlow.WinderLockFinishParam},setlockerror:{robotWinderFlow.WinderLockErrorParam}";
-
-            if(await IAmrControlOp.SetRobotWinderFlow(amrControl))
+            try
             {
-                robotWinderFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.response.swarm_data.flow_id;
-                robotWinderFlow.StartTime = DateTime.Now;
+                IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.priority = robotWinderFlow.Priority.ToString();
+                IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.assigned_robot = robotWinderFlow.AmrSerialNumber;
+                IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.goal_Oy8t1 = robotWinderFlow.CellName;
 
-                return true;
+                IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.artifact_id_aBJDC = robotWinderFlow.WinderUnlockArtifactId;
+                IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.value_aBJDC =
+                    $"setunlockfinish:{robotWinderFlow.WinderUnlockFinishParam},setunlockerror:{robotWinderFlow.WinderUnlockErrorParam}";
+
+                IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.artifact_id_hdN6Z = robotWinderFlow.TmRobotArtifactId;
+                IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.value_hdN6Z =
+                    $"setrobotstarttype:{robotWinderFlow.TmRobotStartParam},setrobotfinish:{robotWinderFlow.TmRobotFinishParam},setroboterror:{robotWinderFlow.TmRobotErrorParam}";
+
+                IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.artifact_id_6zfN9 = robotWinderFlow.WinderLockArtifactId;
+                IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.post.args.Params.Node4.value_6zfN9 =
+                    $"setlockfinish:{robotWinderFlow.WinderLockFinishParam},setlockerror:{robotWinderFlow.WinderLockErrorParam}";
+
+                if (await IAmrControlOp.SetRobotWinderFlow(amrControl))
+                {
+                    robotWinderFlow.FlowId = IAmrControlPack.Packages[amrControl].property.farRobot.robotWinderFlow.response.swarm_data.flow_id;
+                    robotWinderFlow.StartTime = DateTime.Now;
+
+                    return true;
+                }
+                else
+                {
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
+                }
             }
-            else
+            finally
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
+                IAmrControlPack.Packages[amrControl].gate.Release();
             }
-
         }
 
         public async Task<bool> DispatchCancelMission()
@@ -334,25 +378,34 @@ namespace FarRobotControlWithApi_BlazorProject.TaskPackages.SwarmCoreSetMission
             if (string.IsNullOrEmpty(flow.FlowId) || flow.IsFinish || flow.IsCancel)
                 return true;
 
-            IAmrControlPack.Packages[amrControl].property.farRobot.deleteFlow.flowId = flow.FlowId;
+            await IAmrControlPack.Packages[amrControl].gate.WaitAsync();
 
-            if (await IAmrControlOp.SetDeleteFlowByFlowId(amrControl))
+            try
             {
-                if (IAmrControlPack.Packages[amrControl].property.farRobot.deleteFlow.response.system_status_code == 200)
+                IAmrControlPack.Packages[amrControl].property.farRobot.deleteFlow.flowId = flow.FlowId;
+
+                if (await IAmrControlOp.SetDeleteFlowByFlowId(amrControl))
                 {
-                    flow.CancelTime = DateTime.Now;
-                    return true;
+                    if (IAmrControlPack.Packages[amrControl].property.farRobot.deleteFlow.response.system_status_code == 200)
+                    {
+                        flow.CancelTime = DateTime.Now;
+                        return true;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
                 else
                 {
-                    return true;
+                    string nlog = IAmrControlPack.Packages[amrControl].errorLog;
+                    await IDataLib.WriteNLogError(nlog);
+                    return false;
                 }
             }
-            else
+            finally
             {
-                string nlog = IAmrControlPack.Packages[amrControl].errorLog;
-                await IDataLib.WriteNLogError(nlog);
-                return false;
+                IAmrControlPack.Packages[amrControl].gate.Release();
             }
         }
 
