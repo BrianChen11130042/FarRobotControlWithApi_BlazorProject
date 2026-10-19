@@ -20,6 +20,8 @@ namespace FarRobotControlWithApi_BlazorProject.Services.Interface
 
         event dgInitResult dgInitResult;
 
+        event dgRefreshConfigPage dgRefreshConfigPage;
+
         //任務
         Task<List<AmrMissionTable>> GetAmrMissionInQueue();
 

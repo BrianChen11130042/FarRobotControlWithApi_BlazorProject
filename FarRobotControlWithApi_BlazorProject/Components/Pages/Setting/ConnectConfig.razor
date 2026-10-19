@@ -38,6 +38,8 @@
     protected override async Task OnInitializedAsync()
     {
         IService.dgInitResult += _handleInitResult;
+        IService.dgRefreshConfigPage += _handleRefreshPage;
+
         await ReadPageData();
     }
 
@@ -54,8 +56,6 @@
         await IService.SetWebApiClientConfig(editData);
 
         IToastMsg.NotifySuccess("Modify Success");
-
-        await ReadPageData();
     }
 
     public async Task editAmrControl(GridEditModelSavingEventArgs e)
@@ -65,8 +65,6 @@
         await IService.SetAmrControlConfig(editData);
 
         IToastMsg.NotifySuccess("Modify Success");
-
-        await ReadPageData();
     }
 
     async Task initial()
@@ -78,19 +76,28 @@
 
     async Task _handleInitResult(bool success, string msg)
     {
-		if (success)
-		{
-			IToastMsg.NotifySuccess(msg);
-		}
-		else
-		{
-			IToastMsg.NotifyError(msg);
-		}
-	}
+        if (success)
+        {
+            IToastMsg.NotifySuccess(msg);
+        }
+        else
+        {
+            IToastMsg.NotifyError(msg);
+        }
+    }
+
+    async Task _handleRefreshPage()
+    {
+        listWebApiClient = await IService.GetWebApiClientConfig();
+        listAmrControl = await IService.GetAmrControlConfig();
+
+        await InvokeAsync(StateHasChanged);
+    }
 
     public void Dispose()
     {
         IService.dgInitResult -= _handleInitResult;
+        IService.dgRefreshConfigPage -= _handleRefreshPage;
     }
 
 }

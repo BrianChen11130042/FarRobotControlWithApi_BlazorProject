@@ -23,9 +23,12 @@ namespace FarRobotControlWithApi_BlazorProject.Services
     }
 
     public delegate Task dgInitResult(bool success, string msg);
+    public delegate Task dgRefreshConfigPage();
 
     public partial class FarRobotMachineService
     {
+        public event dgRefreshConfigPage dgRefreshConfigPage;
+
         public async Task<List<WebApiClientConfig>> GetWebApiClientConfig()
         {
             return await scope.connectApp.GetWebApiClientConfig();
@@ -34,6 +37,8 @@ namespace FarRobotControlWithApi_BlazorProject.Services
         public async Task SetWebApiClientConfig(WebApiClientConfig config)
         {
             await scope.connectApp.SetWebApiClientConfig(config);
+
+            dgRefreshConfigPage?.Invoke();
         }
 
         public async Task<List<AmrControlConfig>> GetAmrControlConfig()
@@ -44,6 +49,8 @@ namespace FarRobotControlWithApi_BlazorProject.Services
         public async Task SetAmrControlConfig(AmrControlConfig config)
         {
             await scope.connectApp.SetAmrControlConfig(config);
+
+            dgRefreshConfigPage?.Invoke();
         }
 
         public async Task Initial()
