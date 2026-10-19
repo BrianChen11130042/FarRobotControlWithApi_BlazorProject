@@ -48,6 +48,8 @@ namespace FarRobotControlWithApi_BlazorProject.Application
 
             if (result.status)
             {
+                await HandleMissionUpdated(IMissionTableOp.listAmrMissionInQueue);
+
                 return result.status;
             }
             else
