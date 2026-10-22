@@ -1,0 +1,183 @@
+﻿@page "/UserManagement"
+@using DevExpress.Blazor
+@using FarRobotControlWithApi_BlazorProject.UITools.ToastMessage
+@using FarRobotControlWithApi_BlazorProject.UserManagePackage.Application
+@using FarRobotControlWithApi_BlazorProject.UserManagePackage.DTOModel
+@using FarRobotControlWithApi_BlazorProject.UserManagePackage.Data
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@inherits AuthComponentBase
+@inject UserManageApplication UserManageApp
+@inject IToastMessage IToastMsg
+@rendermode RenderMode.InteractiveServer
+@implements IDisposable
+
+<DxGrid @ref="grid" Data="@listUserInfoDto" @bind-SelectedDataItem="@targetUserInfoDto" AllowSelectRowByClick="true" SelectionMode="GridSelectionMode.Single" DataItemDeleting="_deleteUser" HighlightRowOnHover="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
+	<ToolbarTemplate>
+		<DxToolbar>
+			<DxToolbarItem IconCssClass="oi oi-plus" Click="_clickNewUser" />
+			<DxToolbarItem IconCssClass="oi oi-trash" Enabled="@canDeleteUser" Click="_clickDeleteUser" RenderStyle="ButtonRenderStyle.Danger" Alignment="ToolbarItemAlignment.Right" />
+		</DxToolbar>
+	</ToolbarTemplate>
+	<Columns>
+		<DxGridDataColumn FieldName="@nameof(UserInfoDto.Id)" Caption="Id" />
+		<DxGridDataColumn FieldName="@nameof(UserInfoDto.UserName)" Caption="User Name" />
+		<DxGridDataColumn FieldName="@nameof(UserInfoDto.Account)" Caption="Account" />
+		<DxGridDataColumn FieldName="@nameof(UserInfoDto.Role)" Caption="Role" />
+	</Columns>
+</DxGrid>
+
+<DxPopup @ref="popup" HeaderText="New User" ShowCloseButton="true" CloseOnOutsideClick="false" Width="50rem">
+	<BodyContentTemplate Context="PopupNewUserContext">
+		<EditForm Model="@signUpDto" Context="editNewUserContext" OnValidSubmit="_insertNewUser">
+			<DataAnnotationsValidator />
+
+			<DxFormLayout>
+				<DxFormLayoutItem Caption="User Name" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+					<DxTextBox @bind-Text="signUpDto.UserName" />
+				</DxFormLayoutItem>
+
+				<DxFormLayoutItem Caption="Account" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+					<DxTextBox @bind-Text="signUpDto.Account" />
+				</DxFormLayoutItem>
+
+				<DxFormLayoutItem Caption="Password" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+					<DxTextBox @bind-Text="signUpDto.Password" Password="true" />
+				</DxFormLayoutItem>
+
+				<DxFormLayoutItem Caption="Role" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+					<DxComboBox Data="@listRoleType" @bind-Value="signUpDto.Role" />
+				</DxFormLayoutItem>
+
+				<DxFormLayoutItem ColSpanMd="12">
+					<div class="text-end">
+						<DxButton Text="Save"
+								  SubmitFormOnClick="true"
+								  RenderStyle="ButtonRenderStyle.Primary" />
+					</div>
+				</DxFormLayoutItem>
+			</DxFormLayout>
+
+		</EditForm>
+	</BodyContentTemplate>
+</DxPopup>
+
+@code {
+	IGrid? grid { get; set; } = null;
+	DxPopup? popup { get; set; } = null;
+
+	List<UserInfoDto> listUserInfoDto { get; set; } = new List<UserInfoDto>();
+
+	Object? targetUserInfoDto { get; set; } = null;
+	UserInfoDto? selectedUser => targetUserInfoDto as UserInfoDto;
+
+	bool canDeleteUser => selectedUser != null
+								&& AuthApp.IsRoleMoreThan(ERoleType.Admin)
+								&& selectedUser.Account != AuthApp.currentUser?.Account;
+
+	SignUpDto signUpDto { get; set; } = new SignUpDto();
+
+	List<ERoleType> listRoleType = new List<ERoleType>()
+	{
+		ERoleType.Guest,
+		ERoleType.User,
+		ERoleType.Admin,
+		ERoleType.Developer
+	};
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+		UserManageApp.dgUserInfoChanged += _handleUserInfoChanged;
+		await _loadPageInform();
+	}
+
+	async Task _loadPageInform()
+	{
+		var result = await UserManageApp.GetUserInfo();
+
+		if (result.status)
+		{
+			listUserInfoDto = result.listUserInfoDto;
+		}
+		else
+		{
+			IToastMsg.NotifyError(result.msg);
+		}
+	}
+
+	async Task _clickNewUser()
+	{
+		signUpDto = new SignUpDto()
+		{
+			Role = ERoleType.User
+		};
+
+		if (popup is not null)
+		{
+			await popup.ShowAsync();
+		}
+	}
+
+	async Task _clickDeleteUser()
+	{
+		if (grid is not null && targetUserInfoDto is not null)
+		{
+			grid?.ShowDataItemDeleteConfirmation(targetUserInfoDto);
+		}
+	}
+
+	async Task _deleteUser()
+	{
+		if (selectedUser is null)
+		{
+			IToastMsg.NotifyError("Delete user fail");
+			return;
+		}
+
+		var result = await UserManageApp.DeleteUserInfo(selectedUser.Id);
+
+		if (result.status)
+		{
+			IToastMsg.NotifySuccess(result.msg);
+		}
+		else
+		{
+			IToastMsg.NotifyError(result.msg);
+		}
+	}
+
+	async Task _insertNewUser()
+	{
+		var result = await UserManageApp.AddUserInfo(signUpDto);
+
+		if (result.status)
+		{
+			IToastMsg.NotifySuccess(result.msg);
+
+			if (popup is not null)
+			{
+				await popup.CloseAsync();
+			}
+		}
+		else
+		{
+			IToastMsg.NotifyError(result.msg);
+		}
+	}
+
+	async Task _handleUserInfoChanged()
+	{
+		await InvokeAsync(async () =>
+		{
+			await _loadPageInform();
+			StateHasChanged();
+		});
+	}
+
+	public void Dispose()
+	{
+		UserManageApp.dgUserInfoChanged -= _handleUserInfoChanged;
+		base.Dispose();
+	}
+}

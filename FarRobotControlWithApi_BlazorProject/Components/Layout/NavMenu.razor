@@ -1,8 +1,24 @@
-﻿<div class="card p-2">
+﻿@using FarRobotControlWithApi_BlazorProject.UserManagePackage.Component
+@using FarRobotControlWithApi_BlazorProject.UserManagePackage.Data
+@inherits AuthComponentBase
+@rendermode RenderMode.InteractiveServer
+
+<div class="card p-2">
     <DxMenu Orientation="@Orientation.Horizontal" CssClass="menu" ItemsPosition="ItemPosition.Center">
         <Items>
             <DxMenuItem NavigateUrl="/" Text="Home" CssClass="menu-item" IconCssClass="icon home-icon"></DxMenuItem>
-            <DxMenuItem NavigateUrl="/ConnectConfig" Text="Config" CssClass="menu-item" IconCssClass="icon settings-icon"></DxMenuItem>
+
+            <DxMenuItem Visible="@(AuthApp.IsRoleMoreThan(ERoleType.Admin))" NavigateUrl="/ConnectConfig" Text="Config" CssClass="menu-item" IconCssClass="icon settings-icon"></DxMenuItem>
+
+            <UserDxMenuItemComponent />
         </Items>
     </DxMenu>
 </div>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+}

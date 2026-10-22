@@ -1,3 +1,4 @@
+using BitzArt.Blazor.Cookies;
 using CommonLibraryB.Library.AmrControl;
 using CommonLibraryB.Library.AmrControl.Config;
 using CommonLibraryB.Library.AmrControl.Property;
@@ -13,6 +14,9 @@ using FarRobotControlWithApi_BlazorProject.Scope;
 using FarRobotControlWithApi_BlazorProject.Services;
 using FarRobotControlWithApi_BlazorProject.Services.Interface;
 using FarRobotControlWithApi_BlazorProject.UITools.ToastMessage;
+using FarRobotControlWithApi_BlazorProject.UserManagePackage.Application;
+using FarRobotControlWithApi_BlazorProject.UserManagePackage.EFModel;
+using FarRobotControlWithApi_BlazorProject.UserManagePackage.Tool;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
@@ -66,6 +70,15 @@ builder.Services.AddSingleton<MachineScope>();
 
 builder.Services.AddSingleton<IFarRobotMachineService, FarRobotMachineService>();
 
+builder.Services.AddDbContext<UserManageDbContext>(options =>
+options.UseSqlServer(connectString));
+
+builder.Services.AddDataProtection();
+builder.AddBlazorCookies();
+
+builder.Services.AddSingleton<AuthTool>();
+builder.Services.AddScoped<AuthApplication>();
+builder.Services.AddSingleton<UserManageApplication>();
 
 var app = builder.Build();
 

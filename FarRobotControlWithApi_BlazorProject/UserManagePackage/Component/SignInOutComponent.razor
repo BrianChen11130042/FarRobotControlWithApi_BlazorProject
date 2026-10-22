@@ -1,0 +1,92 @@
+﻿@page "/SignInOut"
+@using DevExpress.Blazor
+@using FarRobotControlWithApi_BlazorProject.UITools.ToastMessage
+@using FarRobotControlWithApi_BlazorProject.UserManagePackage.DTOModel
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@inherits AuthComponentBase
+@inject NavigationManager navManager
+@inject IToastMessage IToastMsg
+@rendermode RenderMode.InteractiveServer
+
+
+<div class="card p-4 block-content" style="max-width: 520px; width: 100%; margin: 12vh auto;">
+	@if (AuthApp.IsAuth)
+	{
+		<DxFormLayout>
+			<DxFormLayoutItem Caption="Id" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12" BeginRow="true">
+				<DxTextBox Text="@AuthApp.currentUser?.Id.ToString()" ReadOnly="true" />
+			</DxFormLayoutItem>
+
+			<DxFormLayoutItem Caption="User Name" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12" BeginRow="true">
+				<DxTextBox Text="@AuthApp.currentUser?.UserName" ReadOnly="true" />
+			</DxFormLayoutItem>
+
+			<DxFormLayoutItem Caption="Account" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12" BeginRow="true">
+				<DxTextBox Text="@AuthApp.currentUser?.Account" ReadOnly="true" />
+			</DxFormLayoutItem>
+
+			<DxFormLayoutItem Caption="Role" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12" BeginRow="true">
+				<DxTextBox Text="@AuthApp.currentUser?.Role.ToString()" ReadOnly="true" />
+			</DxFormLayoutItem>
+
+			<DxFormLayoutItem ColSpanMd="12">
+				<div class="text-center">
+					<DxButton Text="Sign Out"
+							  RenderStyle="ButtonRenderStyle.Danger"
+							  Click="SignOutAsync" />
+				</div>
+			</DxFormLayoutItem>
+		</DxFormLayout>
+	}
+	else
+	{
+		<EditForm Model="_signInDto" Context="EditFormContext" OnValidSubmit="SignInAsync">
+			<DataAnnotationsValidator />
+
+			<DxFormLayout>
+				<DxFormLayoutItem Caption="Account" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+					<DxTextBox @bind-Text="_signInDto.Account" />
+				</DxFormLayoutItem>
+
+				<DxFormLayoutItem Caption="Password" CaptionPosition="CaptionPosition.Vertical" ColSpanMd="12">
+					<DxTextBox @bind-Text="_signInDto.Password" Password="true" />
+				</DxFormLayoutItem>
+
+				<DxFormLayoutItem ColSpanMd="12">
+					<div class="text-center">
+						<DxButton Text="Sign In"
+								  SubmitFormOnClick="true"
+								  RenderStyle="ButtonRenderStyle.Info" />
+					</div>
+				</DxFormLayoutItem>
+			</DxFormLayout>
+		</EditForm>
+	}
+</div>
+
+@code {
+	SignInDto _signInDto { get; set; } = new SignInDto();
+
+	async Task SignInAsync()
+	{
+		var result = await AuthApp.SignIn(_signInDto);
+
+		if (result.success)
+		{
+			IToastMsg.NotifySuccess(result.msg);
+		}
+		else
+		{
+			IToastMsg.NotifyError(result.msg);
+		}
+	}
+
+	async Task SignOutAsync()
+	{
+		await AuthApp.SignOut();
+		_signInDto = new SignInDto();
+
+		IToastMsg.NotifyInfo("Sign out success");
+	}
+}

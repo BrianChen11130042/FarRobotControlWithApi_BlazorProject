@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+    <PackageReference Include="BitzArt.Blazor.Cookies.Server" Version="1.5.2" />
     <PackageReference Include="DevExpress.Blazor" Version="24.2.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.18" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.18">

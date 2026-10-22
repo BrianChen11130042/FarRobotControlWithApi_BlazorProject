@@ -1,0 +1,22 @@
+﻿@using DevExpress.Blazor
+@using FarRobotControlWithApi_BlazorProject.UserManagePackage.Data
+@inherits AuthComponentBase
+
+<DxMenuItem Text="@userInfo" IconCssClass="oi oi-person" Position="ItemPosition.End">
+    <Items>
+        <DxMenuItem Visible="@(AuthApp.IsRoleMoreThan(ERoleType.Admin))" Text="User Management" CssClass="menu-item" IconCssClass="oi oi-people" NavigateUrl="/UserManagement" />
+        <DxMenuItem Text="@actionType" IconCssClass="@actionIcon" NavigateUrl="/SignInOut" />
+    </Items>
+</DxMenuItem>
+
+@code {
+
+    string userInfo => $"{AuthApp.currentUser?.UserName}({AuthApp.currentUser?.Role})";
+
+    string actionType => AuthApp.IsAuth ? "Sign Out" : "Sign In";
+
+    string actionIcon => AuthApp.IsAuth
+        ? "oi oi-account-logout"
+        : "oi oi-account-login";
+
+}
