@@ -16,6 +16,7 @@ using FarRobotControlWithApi_BlazorProject.Services.Interface;
 using FarRobotControlWithApi_BlazorProject.UITools.ToastMessage;
 using FarRobotControlWithApi_BlazorProject.UserManagePackage.Application;
 using FarRobotControlWithApi_BlazorProject.UserManagePackage.EFModel;
+using FarRobotControlWithApi_BlazorProject.UserManagePackage.Extension;
 using FarRobotControlWithApi_BlazorProject.UserManagePackage.Tool;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting.WindowsServices;
@@ -70,15 +71,7 @@ builder.Services.AddSingleton<MachineScope>();
 
 builder.Services.AddSingleton<IFarRobotMachineService, FarRobotMachineService>();
 
-builder.Services.AddDbContext<UserManageDbContext>(options =>
-options.UseSqlServer(connectString));
-
-builder.Services.AddDataProtection();
-builder.AddBlazorCookies();
-
-builder.Services.AddSingleton<AuthTool>();
-builder.Services.AddScoped<AuthApplication>();
-builder.Services.AddSingleton<UserManageApplication>();
+builder.AddUserFeaturePack(connectString);
 
 var app = builder.Build();
 
